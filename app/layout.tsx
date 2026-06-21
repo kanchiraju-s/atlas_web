@@ -17,6 +17,8 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
   return (
     <html lang="en">
       <body>
+        {/* Prevent flash: apply stored theme before first paint */}
+        <script dangerouslySetInnerHTML={{ __html: `(function(){var t=localStorage.getItem('atlas-theme');if(t==='light')document.documentElement.setAttribute('data-theme','light');})()` }} />
         <GoogleOAuthProvider clientId={GOOGLE_CLIENT_ID}>
           <QueryProvider>
             <AuthProvider>

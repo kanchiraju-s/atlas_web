@@ -3,6 +3,7 @@
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { useAuthStore } from '@/store/authStore';
+import { useTheme } from '@/hooks/useTheme';
 
 function HomeIcon({ active }: { active: boolean }) {
   return (
@@ -42,6 +43,7 @@ function PersonIcon({ active }: { active: boolean }) {
 export function BottomNav() {
   const pathname = usePathname();
   const user = useAuthStore((s) => s.user);
+  const { theme, toggle } = useTheme();
 
   const isActive = (href: string) => pathname === href || pathname.startsWith(href + '/');
 
@@ -63,6 +65,22 @@ export function BottomNav() {
             <PlusIcon />
           </Link>
         )}
+
+        <button onClick={toggle} className="flex flex-col items-center gap-1 px-5 py-2" aria-label="Toggle theme">
+          {theme === 'dark' ? (
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#71717A" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+              <circle cx="12" cy="12" r="5" />
+              <path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42" />
+            </svg>
+          ) : (
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#71717A" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+              <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z" />
+            </svg>
+          )}
+          <span className="text-[10px] font-medium" style={{ color: '#71717A' }}>
+            {theme === 'dark' ? 'Light' : 'Dark'}
+          </span>
+        </button>
 
         <Link href={user ? '/profile' : '/auth'} className="flex flex-col items-center gap-1 px-5 py-2">
           <PersonIcon active={isActive('/profile') || isActive('/auth')} />
