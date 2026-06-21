@@ -1,4 +1,8 @@
+'use client';
+
+import { useEffect } from 'react';
 import Link from 'next/link';
+import { useAuthStore } from '@/store/authStore';
 
 const TOPICS = [
   'Solo travel in Japan', 'Learning to code at 30', 'Intermittent fasting',
@@ -7,6 +11,17 @@ const TOPICS = [
 ];
 
 export default function LandingPage() {
+  const user = useAuthStore((s) => s.user);
+  const isLoading = useAuthStore((s) => s.isLoading);
+
+  useEffect(() => {
+    if (!isLoading && user) {
+      window.location.replace('/feed');
+    }
+  }, [isLoading, user]);
+
+  if (isLoading || user) return null;
+
   return (
     <div className="flex flex-col items-start gap-16 py-16">
       {/* Hero */}

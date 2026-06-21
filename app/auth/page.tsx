@@ -51,7 +51,7 @@ export default function AuthPage() {
     if (user.status === 'WAITLISTED') {
       setWaitlisted({ displayName: user.displayName });
     } else {
-      router.replace('/feed');
+      window.location.replace('/feed');
     }
   }, [isLoading]); // eslint-disable-line react-hooks/exhaustive-deps
 
@@ -69,7 +69,7 @@ export default function AuthPage() {
       if (tokens.status === 'WAITLISTED') {
         setWaitlisted({ displayName: tokens.displayName });
       } else {
-        router.replace('/feed');
+        window.location.replace('/feed');
       }
     } catch (e: unknown) {
       setError(e instanceof Error ? e.message : 'Sign-in failed. Try again.');
