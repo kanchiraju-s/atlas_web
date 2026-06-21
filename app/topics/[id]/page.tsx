@@ -6,8 +6,8 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import Link from 'next/link';
 import { getTopic, deleteTopic } from '@/services/topicService';
 import { getDrops, createDrop } from '@/services/dropService';
-import { TimeAgo } from '@/components/TimeAgo';
 import { useAuthStore } from '@/store/authStore';
+import { getTopicEmoji, timeAgo } from '@/lib/design';
 
 export default function TopicPage() {
   const { id } = useParams<{ id: string }>();
@@ -42,83 +42,97 @@ export default function TopicPage() {
     onSuccess: () => router.replace('/feed'),
   });
 
-  return (
-    <div className="flex flex-col gap-8">
-      {/* Header */}
-      <div className="flex items-start justify-between gap-4">
-        <div>
-          {topic.isLoading ? (
-            <div className="h-8 w-64 bg-[#111827] rounded animate-pulse" />
-          ) : (
-            <h1 className="text-3xl font-black text-[#f8fafc] tracking-tight">
-              {topic.data?.title}
-            </h1>
-          )}
-        </div>
+  const emoji = topic.data ? getTopicEmoji(topic.data.title) : '🌍';
 
-        {user && !topic.isLoading && topic.data?.createdBy === user.id && (
-          <div className="flex-shrink-0">
-            {confirmDelete ? (
-              <div className="flex items-center gap-2">
-                <span className="text-[#94a3b8] text-xs">Delete this topic?</span>
-                <button
-                  onClick={() => deleteTopicMut.mutate()}
-                  disabled={deleteTopicMut.isPending}
-                  className="text-red-400 text-xs font-semibold hover:text-red-300 disabled:opacity-50 transition-colors"
-                >
-                  {deleteTopicMut.isPending ? 'Deleting…' : 'Yes, delete'}
-                </button>
-                <button
-                  onClick={() => setConfirmDelete(false)}
-                  className="text-[#94a3b8] text-xs hover:text-[#f8fafc] transition-colors"
-                >
-                  Cancel
-                </button>
-              </div>
-            ) : (
-              <button
-                onClick={() => setConfirmDelete(true)}
-                className="text-[#94a3b8] text-xs border border-[#1e293b] px-3 py-1.5 rounded-lg hover:text-red-400 hover:border-red-400/30 transition-colors"
-              >
-                Delete topic
-              </button>
-            )}
-            {deleteTopicMut.isError && (
-              <p className="text-red-400 text-xs mt-1 text-right">
-                Failed — you may not have permission.
-              </p>
-            )}
+  return (
+    <div className="flex flex-col gap-10">
+      {/* Destination header */}
+      <div className="flex flex-col gap-4 pt-2">
+        {topic.isLoading ? (
+          <div className="flex flex-col gap-3">
+            <div className="h-12 w-12 rounded-2xl animate-pulse" style={{ background: '#111111' }} />
+            <div className="h-8 w-64 rounded-xl animate-pulse" style={{ background: '#111111' }} />
           </div>
+        ) : (
+          <>
+            <div className="flex items-start justify-between gap-4">
+              <div className="flex flex-col gap-2">
+                <span className="text-4xl">{emoji}</span>
+                <h1 className="text-2xl sm:text-3xl font-bold tracking-tight" style={{ letterSpacing: '-0.02em' }}>
+                  {topic.data?.title}
+                </h1>
+                {(drops.data?.drops.length ?? 0) > 0 && (
+                  <p className="text-sm" style={{ color: '#71717A' }}>
+                    {drops.data!.drops.length} {drops.data!.drops.length === 1 ? 'experience' : 'experiences'}
+                  </p>
+                )}
+              </div>
+
+              {user && topic.data?.createdBy === user.id && (
+                <div className="flex-shrink-0 pt-1">
+                  {confirmDelete ? (
+                    <div className="flex items-center gap-2">
+                      <span className="text-xs" style={{ color: '#A1A1AA' }}>Delete?</span>
+                      <button
+                        onClick={() => deleteTopicMut.mutate()}
+                        disabled={deleteTopicMut.isPending}
+                        className="text-xs font-semibold text-red-400 disabled:opacity-50"
+                      >
+                        {deleteTopicMut.isPending ? 'Deleting…' : 'Yes'}
+                      </button>
+                      <button onClick={() => setConfirmDelete(false)} className="text-xs" style={{ color: '#71717A' }}>
+                        No
+                      </button>
+                    </div>
+                  ) : (
+                    <button
+                      onClick={() => setConfirmDelete(true)}
+                      className="text-xs px-3 py-1.5 rounded-xl transition-colors"
+                      style={{ color: '#71717A', border: '1px solid rgba(255,255,255,0.08)' }}
+                    >
+                      Delete
+                    </button>
+                  )}
+                </div>
+              )}
+            </div>
+          </>
         )}
       </div>
 
       {/* Compose */}
       {user ? (
-        <div className="bg-[#111827] border border-[#1e293b] rounded-xl p-4">
+        <div className="rounded-2xl p-5 transition-all" style={{ background: '#111111', border: '1px solid rgba(255,255,255,0.08)' }}>
           {composing ? (
-            <div className="flex flex-col gap-3">
+            <div className="flex flex-col gap-4">
               <textarea
                 autoFocus
                 value={draft}
                 onChange={(e) => setDraft(e.target.value)}
-                placeholder="Share your experience…"
+                placeholder="Share your experience here…"
                 rows={4}
-                className="w-full bg-transparent text-[#f8fafc] placeholder:text-[#94a3b8] resize-none focus:outline-none text-sm"
+                className="w-full bg-transparent resize-none focus:outline-none text-sm leading-relaxed"
+                style={{ color: '#FFFFFF' }}
               />
-              <div className="flex gap-2 justify-end">
-                <button
-                  onClick={() => { setComposing(false); setDraft(''); }}
-                  className="text-[#94a3b8] text-sm px-4 py-2 hover:text-[#f8fafc] transition-colors"
-                >
-                  Cancel
-                </button>
-                <button
-                  disabled={draft.trim().length < 3 || createDropMut.isPending}
-                  onClick={() => createDropMut.mutate(draft.trim())}
-                  className="bg-[#38bdf8] text-[#0f172a] px-5 py-2 rounded-lg text-sm font-semibold disabled:opacity-50 hover:bg-[#38bdf8]/90 transition-colors"
-                >
-                  {createDropMut.isPending ? 'Dropping…' : 'Drop it'}
-                </button>
+              <div className="flex items-center justify-between">
+                <span className="text-xs" style={{ color: '#71717A' }}>{draft.length} chars</span>
+                <div className="flex gap-2">
+                  <button
+                    onClick={() => { setComposing(false); setDraft(''); }}
+                    className="text-sm px-4 py-2 rounded-xl transition-colors"
+                    style={{ color: '#71717A' }}
+                  >
+                    Cancel
+                  </button>
+                  <button
+                    disabled={draft.trim().length < 3 || createDropMut.isPending}
+                    onClick={() => createDropMut.mutate(draft.trim())}
+                    className="px-5 py-2 rounded-xl text-sm font-semibold disabled:opacity-50 transition-opacity hover:opacity-90"
+                    style={{ background: '#0A84FF', color: '#FFFFFF' }}
+                  >
+                    {createDropMut.isPending ? 'Posting…' : 'Drop it'}
+                  </button>
+                </div>
               </div>
               {createDropMut.isError && (
                 <p className="text-red-400 text-xs">Failed to post. Try again.</p>
@@ -127,46 +141,54 @@ export default function TopicPage() {
           ) : (
             <button
               onClick={() => setComposing(true)}
-              className="text-[#94a3b8] text-sm w-full text-left hover:text-[#f8fafc] transition-colors"
+              className="text-sm w-full text-left transition-colors"
+              style={{ color: '#71717A' }}
             >
               Share your experience on this topic…
             </button>
           )}
         </div>
       ) : (
-        <div className="bg-[#111827] border border-[#1e293b] rounded-xl p-4 flex items-center justify-between">
-          <span className="text-[#94a3b8] text-sm">Sign in to share your experience.</span>
-          <Link href="/auth" className="text-[#38bdf8] text-sm font-semibold hover:underline">
+        <div className="rounded-2xl p-5 flex items-center justify-between" style={{ background: '#111111', border: '1px solid rgba(255,255,255,0.08)' }}>
+          <span className="text-sm" style={{ color: '#A1A1AA' }}>Sign in to share your experience.</span>
+          <Link href="/auth" className="text-sm font-semibold" style={{ color: '#0A84FF' }}>
             Sign in
           </Link>
         </div>
       )}
 
-      {/* Drops */}
+      {/* Drops as journal entries */}
       {drops.isLoading ? (
-        <div className="flex flex-col gap-3">
-          {[...Array(4)].map((_, i) => (
-            <div key={i} className="h-24 bg-[#111827] rounded-xl animate-pulse" />
+        <div className="flex flex-col gap-4">
+          {[...Array(3)].map((_, i) => (
+            <div key={i} className="h-28 rounded-2xl animate-pulse" style={{ background: '#111111' }} />
           ))}
         </div>
       ) : drops.data?.drops.length === 0 ? (
-        <p className="text-[#94a3b8] text-sm text-center py-12">
-          No drops yet. Be the first to share an experience.
+        <p className="text-sm text-center py-12" style={{ color: '#71717A' }}>
+          No experiences yet. Be the first to drop one.
         </p>
       ) : (
-        <div className="flex flex-col gap-3">
-          {drops.data?.drops.map((drop) => (
+        <div className="flex flex-col">
+          {drops.data?.drops.map((drop, idx) => (
             <Link
               key={drop.id}
               href={`/drops/${drop.id}`}
-              className="block bg-[#111827] border border-[#1e293b] rounded-xl p-4 hover:border-[#38bdf8]/30 transition-colors"
+              className="block py-5 transition-all duration-150 group"
+              style={{ borderBottom: idx < (drops.data?.drops.length ?? 0) - 1 ? '1px solid rgba(255,255,255,0.05)' : 'none' }}
             >
-              <p className="text-[#f8fafc] text-sm leading-relaxed">{drop.content}</p>
-              <div className="flex items-center gap-3 mt-3 text-[#94a3b8] text-xs">
-                <span>{drop.authorName ?? 'Explorer'}</span>
-                <TimeAgo date={drop.createdAt} />
+              <p className="text-base leading-relaxed group-hover:opacity-80 transition-opacity" style={{ color: '#FFFFFF' }}>
+                {drop.content}
+              </p>
+              <div className="flex items-center gap-3 mt-3">
+                <span className="text-xs font-medium" style={{ color: '#71717A' }}>{drop.authorName ?? 'Explorer'}</span>
+                <span className="text-xs" style={{ color: '#71717A' }}>·</span>
+                <span className="text-xs" style={{ color: '#71717A' }}>{timeAgo(drop.createdAt)}</span>
                 {(drop.discussionCount ?? 0) > 0 && (
-                  <span>{drop.discussionCount} discussion{drop.discussionCount !== 1 ? 's' : ''}</span>
+                  <>
+                    <span className="text-xs" style={{ color: '#71717A' }}>·</span>
+                    <span className="text-xs" style={{ color: '#0A84FF' }}>{drop.discussionCount} {drop.discussionCount === 1 ? 'reply' : 'replies'}</span>
+                  </>
                 )}
               </div>
             </Link>

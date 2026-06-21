@@ -19,7 +19,6 @@ export default function CreateTopicPage() {
     if (!isLoading && !user) router.replace('/auth');
   }, [user, isLoading, router]);
 
-  // When a duplicate is detected, search for the existing topic to link to it
   const existingTopics = useQuery({
     queryKey: ['topic-search-existing', title],
     queryFn: () => searchTopics(title.trim()),
@@ -46,11 +45,15 @@ export default function CreateTopicPage() {
   ) ?? existingTopics.data?.[0];
 
   return (
-    <div className="max-w-xl flex flex-col gap-6">
-      <h1 className="text-2xl font-black text-[#f8fafc] tracking-tight">Create a Topic</h1>
-      <p className="text-[#94a3b8] text-sm">
-        Topics are the destinations. People will drop experiences here.
-      </p>
+    <div className="max-w-lg flex flex-col gap-8 pt-4">
+      <div className="flex flex-col gap-2">
+        <h1 className="text-2xl font-bold tracking-tight" style={{ letterSpacing: '-0.02em' }}>
+          New Destination
+        </h1>
+        <p className="text-sm" style={{ color: '#71717A' }}>
+          Create a topic that others can drop experiences into.
+        </p>
+      </div>
 
       <div className="flex flex-col gap-3">
         <input
@@ -60,48 +63,55 @@ export default function CreateTopicPage() {
           onChange={(e) => { setTitle(e.target.value); setIsDuplicate(false); }}
           placeholder="e.g. Solo travel in Japan"
           maxLength={120}
-          className={`w-full bg-[#111827] border rounded-xl px-5 py-4 text-base text-[#f8fafc] placeholder:text-[#94a3b8] focus:outline-none transition-colors ${
-            isDuplicate ? 'border-yellow-500/60 focus:border-yellow-500' : 'border-[#1e293b] focus:border-[#38bdf8]/50'
-          }`}
+          className="w-full py-4 px-5 text-base rounded-2xl focus:outline-none transition-all duration-200"
+          style={{
+            background: '#111111',
+            border: isDuplicate ? '1px solid rgba(255,196,0,0.4)' : '1px solid rgba(255,255,255,0.08)',
+            color: '#FFFFFF',
+          }}
+          onFocus={(e) => {
+            if (!isDuplicate) e.currentTarget.style.borderColor = 'rgba(10,132,255,0.4)';
+          }}
+          onBlur={(e) => {
+            if (!isDuplicate) e.currentTarget.style.borderColor = 'rgba(255,255,255,0.08)';
+          }}
           onKeyDown={(e) => {
             if (e.key === 'Enter' && title.trim().length >= 3) handleSubmit();
           }}
         />
 
-        {/* Duplicate warning */}
         {isDuplicate && (
-          <div className="bg-yellow-500/10 border border-yellow-500/30 rounded-xl px-4 py-3 flex flex-col gap-2">
-            <p className="text-yellow-400 text-sm font-medium">
-              A topic with this name already exists.
+          <div className="rounded-2xl px-5 py-4 flex flex-col gap-2" style={{ background: 'rgba(255,196,0,0.06)', border: '1px solid rgba(255,196,0,0.2)' }}>
+            <p className="text-sm font-medium" style={{ color: '#FFD60A' }}>
+              This destination already exists.
             </p>
             {exactMatch ? (
               <Link
                 href={`/topics/${exactMatch.id}`}
-                className="text-[#38bdf8] text-sm hover:underline"
+                className="text-sm font-medium"
+                style={{ color: '#0A84FF' }}
               >
                 Go to "{exactMatch.title}" →
               </Link>
             ) : (
-              <p className="text-[#94a3b8] text-xs">
-                Try searching for it instead.
-              </p>
+              <p className="text-xs" style={{ color: '#A1A1AA' }}>Try searching for it instead.</p>
             )}
           </div>
         )}
 
-        {/* Generic error (not duplicate) */}
         {mutation.isError && !isDuplicate && (
-          <p className="text-red-400 text-sm">Failed to create topic. Try again.</p>
+          <p className="text-red-400 text-sm">Failed to create. Try again.</p>
         )}
 
-        <div className="flex items-center justify-between">
-          <span className="text-[#94a3b8] text-xs">{title.length}/120</span>
+        <div className="flex items-center justify-between pt-1">
+          <span className="text-xs" style={{ color: '#71717A' }}>{title.length}/120</span>
           <button
             disabled={title.trim().length < 3 || mutation.isPending}
             onClick={handleSubmit}
-            className="bg-[#38bdf8] text-[#0f172a] px-6 py-3 rounded-xl font-bold text-sm disabled:opacity-50 hover:bg-[#38bdf8]/90 transition-colors"
+            className="px-6 py-3 rounded-2xl font-semibold text-sm disabled:opacity-50 transition-opacity hover:opacity-90"
+            style={{ background: '#0A84FF', color: '#FFFFFF' }}
           >
-            {mutation.isPending ? 'Creating…' : 'Create Topic'}
+            {mutation.isPending ? 'Creating…' : 'Create Destination'}
           </button>
         </div>
       </div>

@@ -4,6 +4,7 @@ import { QueryProvider } from '@/providers/QueryProvider';
 import { AuthProvider } from '@/providers/AuthProvider';
 import { GoogleOAuthProvider } from '@react-oauth/google';
 import { Nav } from '@/components/Nav';
+import { BottomNav } from '@/components/BottomNav';
 
 export const metadata: Metadata = {
   title: 'Atlas — Human experiences mapped.',
@@ -20,9 +21,10 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
           <QueryProvider>
             <AuthProvider>
               <Nav />
-              <main className="max-w-4xl mx-auto px-4 py-8">
+              <main className="max-w-[1100px] mx-auto px-5 sm:px-8 pt-8 pb-28 sm:pb-16">
                 {children}
               </main>
+              <BottomNav />
             </AuthProvider>
           </QueryProvider>
         </GoogleOAuthProvider>

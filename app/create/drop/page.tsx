@@ -7,6 +7,7 @@ import Link from 'next/link';
 import { createDrop } from '@/services/dropService';
 import { searchTopics } from '@/services/topicService';
 import { useAuthStore } from '@/store/authStore';
+import { getTopicEmoji } from '@/lib/design';
 import type { Topic } from '@/lib/api';
 
 function CreateDropForm() {
@@ -33,23 +34,31 @@ function CreateDropForm() {
   });
 
   return (
-    <div className="max-w-xl flex flex-col gap-6">
+    <div className="max-w-lg flex flex-col gap-8 pt-4">
       <div className="flex items-center justify-between">
-        <h1 className="text-2xl font-black text-[#f8fafc] tracking-tight">Drop something</h1>
-        <Link href="/create/topic" className="text-[#38bdf8] text-sm hover:underline">
-          + New topic
+        <h1 className="text-2xl font-bold tracking-tight" style={{ letterSpacing: '-0.02em' }}>
+          Drop an Experience
+        </h1>
+        <Link href="/create/topic" className="text-sm font-medium" style={{ color: '#0A84FF' }}>
+          + New destination
         </Link>
       </div>
 
-      {/* Topic picker */}
+      {/* Destination picker */}
       <div className="flex flex-col gap-2">
-        <label className="text-[#94a3b8] text-xs uppercase tracking-widest font-semibold">Topic</label>
+        <label className="text-xs font-semibold uppercase tracking-widest" style={{ color: '#71717A' }}>
+          Destination
+        </label>
         {selectedTopic ? (
-          <div className="flex items-center gap-3 bg-[#111827] border border-[#38bdf8]/40 rounded-xl px-4 py-3">
-            <span className="text-[#f8fafc] text-sm flex-1">{selectedTopic.title}</span>
+          <div className="flex items-center gap-3 rounded-2xl px-4 py-3.5" style={{ background: '#111111', border: '1px solid rgba(10,132,255,0.3)' }}>
+            <span>{getTopicEmoji(selectedTopic.title)}</span>
+            <span className="text-sm flex-1">{selectedTopic.title}</span>
             <button
               onClick={() => setSelectedTopic(null)}
-              className="text-[#94a3b8] text-xs hover:text-[#f8fafc]"
+              className="text-xs transition-colors"
+              style={{ color: '#71717A' }}
+              onMouseEnter={(e) => { e.currentTarget.style.color = '#FFFFFF'; }}
+              onMouseLeave={(e) => { e.currentTarget.style.color = '#71717A'; }}
             >
               Change
             </button>
@@ -60,18 +69,29 @@ function CreateDropForm() {
               type="text"
               value={topicQuery}
               onChange={(e) => setTopicQuery(e.target.value)}
-              placeholder="Search for a topic…"
-              className="w-full bg-[#111827] border border-[#1e293b] text-[#f8fafc] rounded-xl px-4 py-3 text-sm placeholder:text-[#94a3b8] focus:outline-none focus:border-[#38bdf8]/50"
+              placeholder="Search for a destination…"
+              className="w-full py-3.5 px-4 text-sm rounded-2xl focus:outline-none transition-all"
+              style={{
+                background: '#111111',
+                border: '1px solid rgba(255,255,255,0.08)',
+                color: '#FFFFFF',
+              }}
+              onFocus={(e) => { e.currentTarget.style.borderColor = 'rgba(10,132,255,0.4)'; }}
+              onBlur={(e) => { e.currentTarget.style.borderColor = 'rgba(255,255,255,0.08)'; }}
             />
-            {topicSearch.data && topicSearch.data.length > 0 && (
-              <div className="absolute top-full mt-1 w-full bg-[#111827] border border-[#1e293b] rounded-xl overflow-hidden z-10">
-                {topicSearch.data.map((t) => (
+            {(topicSearch.data?.length ?? 0) > 0 && (
+              <div className="absolute top-full mt-1 w-full rounded-2xl overflow-hidden z-10" style={{ background: '#1C1C1E', border: '1px solid rgba(255,255,255,0.08)', boxShadow: '0 8px 32px rgba(0,0,0,0.6)' }}>
+                {topicSearch.data!.map((t) => (
                   <button
                     key={t.id}
                     onClick={() => { setSelectedTopic(t); setTopicQuery(''); }}
-                    className="w-full text-left px-4 py-3 text-sm text-[#f8fafc] hover:bg-[#1e293b] transition-colors"
+                    className="w-full text-left px-4 py-3 text-sm flex items-center gap-3 transition-colors"
+                    style={{ borderBottom: '1px solid rgba(255,255,255,0.04)' }}
+                    onMouseEnter={(e) => { e.currentTarget.style.background = 'rgba(255,255,255,0.04)'; }}
+                    onMouseLeave={(e) => { e.currentTarget.style.background = 'transparent'; }}
                   >
-                    {t.title}
+                    <span className="text-base">{getTopicEmoji(t.title)}</span>
+                    <span>{t.title}</span>
                   </button>
                 ))}
               </div>
@@ -81,22 +101,32 @@ function CreateDropForm() {
       </div>
 
       {/* Content */}
-      <div className="flex flex-col gap-2">
-        <label className="text-[#94a3b8] text-xs uppercase tracking-widest font-semibold">Your drop</label>
+      <div className="flex flex-col gap-3">
+        <label className="text-xs font-semibold uppercase tracking-widest" style={{ color: '#71717A' }}>
+          Your experience
+        </label>
         <textarea
           value={content}
           onChange={(e) => setContent(e.target.value)}
-          placeholder="Share your experience, story, opinion, or question…"
-          rows={6}
+          placeholder="Share your experience, story, opinion, or honest take…"
+          rows={7}
           maxLength={2000}
-          className="w-full bg-[#111827] border border-[#1e293b] text-[#f8fafc] rounded-xl px-4 py-3 text-sm placeholder:text-[#94a3b8] resize-none focus:outline-none focus:border-[#38bdf8]/50"
+          className="w-full rounded-2xl px-5 py-4 text-sm resize-none focus:outline-none transition-all leading-relaxed"
+          style={{
+            background: '#111111',
+            border: '1px solid rgba(255,255,255,0.08)',
+            color: '#FFFFFF',
+          }}
+          onFocus={(e) => { e.currentTarget.style.borderColor = 'rgba(10,132,255,0.4)'; }}
+          onBlur={(e) => { e.currentTarget.style.borderColor = 'rgba(255,255,255,0.08)'; }}
         />
         <div className="flex items-center justify-between">
-          <span className="text-[#94a3b8] text-xs">{content.length}/2000</span>
+          <span className="text-xs" style={{ color: '#71717A' }}>{content.length}/2000</span>
           <button
             disabled={!selectedTopic || content.trim().length < 10 || mutation.isPending}
             onClick={() => mutation.mutate()}
-            className="bg-[#38bdf8] text-[#0f172a] px-6 py-3 rounded-xl font-bold text-sm disabled:opacity-50 hover:bg-[#38bdf8]/90 transition-colors"
+            className="px-6 py-3 rounded-2xl font-semibold text-sm disabled:opacity-50 transition-opacity hover:opacity-90"
+            style={{ background: '#0A84FF', color: '#FFFFFF' }}
           >
             {mutation.isPending ? 'Dropping…' : 'Drop it'}
           </button>

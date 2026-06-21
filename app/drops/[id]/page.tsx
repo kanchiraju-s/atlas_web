@@ -7,8 +7,8 @@ import Link from 'next/link';
 import { getDrop } from '@/services/dropService';
 import { getDiscussions, createDiscussion } from '@/services/discussionService';
 import { getTopic } from '@/services/topicService';
-import { TimeAgo } from '@/components/TimeAgo';
 import { useAuthStore } from '@/store/authStore';
+import { timeAgo } from '@/lib/design';
 import type { Discussion } from '@/lib/api';
 
 function DiscussionThread({ disc, dropId, depth = 0 }: { disc: Discussion; dropId: string; depth?: number }) {
@@ -27,42 +27,52 @@ function DiscussionThread({ disc, dropId, depth = 0 }: { disc: Discussion; dropI
   });
 
   return (
-    <div className={depth > 0 ? 'ml-6 border-l border-[#1e293b] pl-4' : ''}>
-      <div className="py-3">
-        <div className="flex items-center gap-2 mb-1">
-          <span className="text-[#38bdf8] text-xs font-medium">{disc.authorName ?? 'Explorer'}</span>
-          <TimeAgo date={disc.createdAt} />
+    <div className={depth > 0 ? 'pl-5' : ''} style={depth > 0 ? { borderLeft: '1px solid rgba(255,255,255,0.06)' } : {}}>
+      <div className="py-4">
+        <div className="flex items-center gap-2 mb-2">
+          <span className="text-xs font-semibold" style={{ color: '#FFFFFF' }}>{disc.authorName ?? 'Explorer'}</span>
+          <span className="text-xs" style={{ color: '#71717A' }}>· {timeAgo(disc.createdAt)}</span>
         </div>
-        <p className="text-[#f8fafc] text-sm leading-relaxed">{disc.content}</p>
+        <p className="text-sm leading-relaxed" style={{ color: '#A1A1AA' }}>{disc.content}</p>
         {user && depth < 3 && (
           <button
             onClick={() => setReplying(!replying)}
-            className="text-[#94a3b8] text-xs mt-2 hover:text-[#f8fafc] transition-colors"
+            className="text-xs mt-2 transition-colors"
+            style={{ color: '#71717A' }}
+            onMouseEnter={(e) => { e.currentTarget.style.color = '#0A84FF'; }}
+            onMouseLeave={(e) => { e.currentTarget.style.color = '#71717A'; }}
           >
             Reply
           </button>
         )}
         {replying && (
-          <div className="mt-2 flex flex-col gap-2">
+          <div className="mt-3 flex flex-col gap-2">
             <textarea
               autoFocus
               value={replyText}
               onChange={(e) => setReplyText(e.target.value)}
               placeholder="Your reply…"
               rows={2}
-              className="w-full bg-[#0f172a] border border-[#1e293b] text-[#f8fafc] rounded-lg px-3 py-2 text-sm placeholder:text-[#94a3b8] resize-none focus:outline-none focus:border-[#38bdf8]/50"
+              className="w-full rounded-xl px-4 py-3 text-sm resize-none focus:outline-none transition-all"
+              style={{
+                background: '#1C1C1E',
+                border: '1px solid rgba(255,255,255,0.08)',
+                color: '#FFFFFF',
+              }}
             />
             <div className="flex gap-2">
               <button
                 onClick={() => { setReplying(false); setReplyText(''); }}
-                className="text-[#94a3b8] text-xs px-3 py-1.5 hover:text-[#f8fafc]"
+                className="text-xs px-3 py-1.5"
+                style={{ color: '#71717A' }}
               >
                 Cancel
               </button>
               <button
                 disabled={replyText.trim().length < 2 || replyMut.isPending}
                 onClick={() => replyMut.mutate(replyText.trim())}
-                className="bg-[#38bdf8] text-[#0f172a] text-xs px-4 py-1.5 rounded-lg font-semibold disabled:opacity-50"
+                className="text-xs px-4 py-1.5 rounded-xl font-semibold disabled:opacity-50"
+                style={{ background: '#0A84FF', color: '#FFFFFF' }}
               >
                 {replyMut.isPending ? 'Posting…' : 'Reply'}
               </button>
@@ -103,75 +113,97 @@ export default function DropPage() {
   });
 
   return (
-    <div className="flex flex-col gap-8">
-      {/* Drop */}
-      <div className="bg-[#111827] border border-[#1e293b] rounded-xl p-6">
-        {drop.isLoading ? (
-          <div className="flex flex-col gap-2">
-            <div className="h-4 w-32 bg-[#1e293b] rounded animate-pulse" />
-            <div className="h-20 bg-[#1e293b] rounded animate-pulse" />
-          </div>
-        ) : (
-          <>
-            {topic.data && (
-              <Link href={`/topics/${drop.data?.topicId}`} className="text-[#38bdf8] text-xs font-medium hover:underline mb-3 block">
-                {topic.data.title}
-              </Link>
-            )}
-            <p className="text-[#f8fafc] text-base leading-relaxed">{drop.data?.content}</p>
-            <div className="flex items-center gap-3 mt-4 text-[#94a3b8] text-xs">
-              <span>{drop.data?.authorName ?? 'Explorer'}</span>
-              <TimeAgo date={drop.data?.createdAt} />
-            </div>
-          </>
-        )}
-      </div>
+    <div className="flex flex-col gap-10 max-w-2xl">
+      {/* Breadcrumb */}
+      {topic.data && (
+        <Link href={`/topics/${drop.data?.topicId}`} className="flex items-center gap-1.5 text-xs font-medium transition-opacity hover:opacity-70" style={{ color: '#0A84FF' }}>
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+            <path d="M19 12H5M12 19l-7-7 7-7" />
+          </svg>
+          {topic.data.title}
+        </Link>
+      )}
 
-      {/* Discussion composer */}
-      <div>
-        <h2 className="text-[#94a3b8] text-xs uppercase tracking-widest font-semibold mb-4">
-          Discussion
-        </h2>
+      {/* Drop — journal entry style */}
+      {drop.isLoading ? (
+        <div className="flex flex-col gap-3">
+          <div className="h-4 w-24 rounded-lg animate-pulse" style={{ background: '#111111' }} />
+          <div className="h-24 rounded-2xl animate-pulse" style={{ background: '#111111' }} />
+        </div>
+      ) : (
+        <div className="flex flex-col gap-4">
+          <p className="text-lg sm:text-xl leading-relaxed font-normal" style={{ color: '#FFFFFF', lineHeight: 1.7 }}>
+            {drop.data?.content}
+          </p>
+          <div className="flex items-center gap-2 pt-2" style={{ borderTop: '1px solid rgba(255,255,255,0.05)' }}>
+            <span className="text-sm font-medium" style={{ color: '#A1A1AA' }}>{drop.data?.authorName ?? 'Explorer'}</span>
+            {drop.data?.createdAt && (
+              <>
+                <span style={{ color: '#71717A' }}>·</span>
+                <span className="text-sm" style={{ color: '#71717A' }}>{timeAgo(drop.data.createdAt)}</span>
+              </>
+            )}
+          </div>
+        </div>
+      )}
+
+      {/* Discussion section */}
+      <div className="flex flex-col gap-6">
+        <div className="flex items-center gap-3">
+          <span className="text-xs font-semibold uppercase tracking-widest" style={{ color: '#71717A' }}>
+            Discussion {discussions.data?.length ? `(${discussions.data.length})` : ''}
+          </span>
+          <div className="h-px flex-1" style={{ background: 'rgba(255,255,255,0.06)' }} />
+        </div>
+
         {user ? (
-          <div className="flex flex-col gap-2 mb-6">
+          <div className="flex flex-col gap-3">
             <textarea
               value={comment}
               onChange={(e) => setComment(e.target.value)}
               placeholder="Add to the discussion…"
               rows={3}
-              className="w-full bg-[#111827] border border-[#1e293b] text-[#f8fafc] rounded-xl px-4 py-3 text-sm placeholder:text-[#94a3b8] resize-none focus:outline-none focus:border-[#38bdf8]/50"
+              className="w-full rounded-2xl px-5 py-4 text-sm resize-none focus:outline-none transition-all"
+              style={{
+                background: '#111111',
+                border: '1px solid rgba(255,255,255,0.08)',
+                color: '#FFFFFF',
+              }}
+              onFocus={(e) => { e.currentTarget.style.borderColor = 'rgba(10,132,255,0.4)'; }}
+              onBlur={(e) => { e.currentTarget.style.borderColor = 'rgba(255,255,255,0.08)'; }}
             />
             <div className="flex justify-end">
               <button
                 disabled={comment.trim().length < 2 || createMut.isPending}
                 onClick={() => createMut.mutate(comment.trim())}
-                className="bg-[#38bdf8] text-[#0f172a] px-5 py-2 rounded-lg text-sm font-semibold disabled:opacity-50 hover:bg-[#38bdf8]/90 transition-colors"
+                className="px-5 py-2 rounded-xl text-sm font-semibold disabled:opacity-50 transition-opacity hover:opacity-90"
+                style={{ background: '#0A84FF', color: '#FFFFFF' }}
               >
                 {createMut.isPending ? 'Posting…' : 'Post'}
               </button>
             </div>
           </div>
         ) : (
-          <div className="bg-[#111827] border border-[#1e293b] rounded-xl p-4 flex items-center justify-between mb-6">
-            <span className="text-[#94a3b8] text-sm">Sign in to join the discussion.</span>
-            <Link href="/auth" className="text-[#38bdf8] text-sm font-semibold hover:underline">
-              Sign in
-            </Link>
+          <div className="rounded-2xl p-4 flex items-center justify-between" style={{ background: '#111111', border: '1px solid rgba(255,255,255,0.08)' }}>
+            <span className="text-sm" style={{ color: '#A1A1AA' }}>Sign in to join the discussion.</span>
+            <Link href="/auth" className="text-sm font-semibold" style={{ color: '#0A84FF' }}>Sign in</Link>
           </div>
         )}
 
         {discussions.isLoading ? (
           <div className="flex flex-col gap-3">
             {[...Array(3)].map((_, i) => (
-              <div key={i} className="h-16 bg-[#111827] rounded-xl animate-pulse" />
+              <div key={i} className="h-16 rounded-2xl animate-pulse" style={{ background: '#111111' }} />
             ))}
           </div>
         ) : discussions.data?.length === 0 ? (
-          <p className="text-[#94a3b8] text-sm">No discussion yet. Start one above.</p>
+          <p className="text-sm" style={{ color: '#71717A' }}>No discussion yet. Start one above.</p>
         ) : (
-          <div className="divide-y divide-[#1e293b]">
-            {discussions.data?.map((d) => (
-              <DiscussionThread key={d.id} disc={d} dropId={id} />
+          <div>
+            {discussions.data?.map((d, idx) => (
+              <div key={d.id} style={{ borderTop: idx > 0 ? '1px solid rgba(255,255,255,0.05)' : 'none' }}>
+                <DiscussionThread disc={d} dropId={id} />
+              </div>
             ))}
           </div>
         )}
