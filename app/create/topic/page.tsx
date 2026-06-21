@@ -1,7 +1,7 @@
 'use client';
 
-import { useState, useEffect } from 'react';
-import { useRouter } from 'next/navigation';
+import { useState, useEffect, Suspense } from 'react';
+import { useRouter, useSearchParams } from 'next/navigation';
 import { useMutation, useQuery } from '@tanstack/react-query';
 import Link from 'next/link';
 import { createTopic, searchTopics } from '@/services/topicService';
@@ -9,10 +9,15 @@ import { useAuthStore } from '@/store/authStore';
 import { ApiError } from '@/lib/api';
 
 export default function CreateTopicPage() {
+  return <Suspense><CreateTopicForm /></Suspense>;
+}
+
+function CreateTopicForm() {
   const router = useRouter();
+  const searchParams = useSearchParams();
   const user = useAuthStore((s) => s.user);
   const isLoading = useAuthStore((s) => s.isLoading);
-  const [title, setTitle] = useState('');
+  const [title, setTitle] = useState(searchParams.get('title') ?? '');
   const [isDuplicate, setIsDuplicate] = useState(false);
 
   useEffect(() => {

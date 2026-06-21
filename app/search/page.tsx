@@ -143,7 +143,39 @@ function SearchContent() {
             </section>
           )}
 
-          {!hasResults && <p style={{ fontSize: 14, color: 'var(--text-muted)' }}>No results for "{dq}".</p>}
+          {!hasResults && (
+            <div style={{ paddingTop: 8 }}>
+              <p style={{ fontSize: 14, color: 'var(--text-muted)', marginBottom: 24 }}>
+                Nothing found for "{dq}".
+              </p>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+                <Link
+                  href={`/create/topic?title=${encodeURIComponent(dq)}`}
+                  style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '14px 16px', background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: 10, fontSize: 14, transition: 'border-color 150ms' }}
+                  onMouseEnter={e => { (e.currentTarget as HTMLElement).style.borderColor = 'rgba(10,132,255,0.4)'; }}
+                  onMouseLeave={e => { (e.currentTarget as HTMLElement).style.borderColor = 'var(--border)'; }}
+                >
+                  <div>
+                    <p style={{ fontWeight: 500, marginBottom: 2 }}>Create "{dq}"</p>
+                    <p style={{ fontSize: 12, color: 'var(--text-muted)' }}>Start a new destination for this topic</p>
+                  </div>
+                  <span style={{ fontSize: 18 }}>+</span>
+                </Link>
+                <Link
+                  href={`/create/drop`}
+                  style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '14px 16px', background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: 10, fontSize: 14, transition: 'border-color 150ms' }}
+                  onMouseEnter={e => { (e.currentTarget as HTMLElement).style.borderColor = 'rgba(10,132,255,0.4)'; }}
+                  onMouseLeave={e => { (e.currentTarget as HTMLElement).style.borderColor = 'var(--border)'; }}
+                >
+                  <div>
+                    <p style={{ fontWeight: 500, marginBottom: 2 }}>Drop an experience</p>
+                    <p style={{ fontSize: 12, color: 'var(--text-muted)' }}>Share what you know about this</p>
+                  </div>
+                  <span style={{ fontSize: 16 }}>→</span>
+                </Link>
+              </div>
+            </div>
+          )}
         </div>
       )}
     </div>
