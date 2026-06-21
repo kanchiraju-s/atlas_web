@@ -31,26 +31,6 @@ export default function FeedPage() {
 
   return (
     <div className="flex flex-col gap-10">
-      {/* Trending Topics */}
-      {data?.trendingTopics && data.trendingTopics.length > 0 && (
-        <section>
-          <h2 className="text-[#94a3b8] text-xs uppercase tracking-widest font-semibold mb-4">
-            Trending Topics
-          </h2>
-          <div className="flex flex-wrap gap-2">
-            {data.trendingTopics.map((t) => (
-              <Link
-                key={t.id}
-                href={`/topics/${t.id}`}
-                className="border border-[#1e293b] text-[#cbd5e1] px-4 py-2 rounded-full text-sm hover:border-[#38bdf8]/40 hover:text-[#f8fafc] transition-colors"
-              >
-                {t.title}
-              </Link>
-            ))}
-          </div>
-        </section>
-      )}
-
       {/* Recent Drops */}
       {data?.recentDrops && data.recentDrops.length > 0 && (
         <section>
@@ -81,7 +61,7 @@ export default function FeedPage() {
         </section>
       )}
 
-      {/* Continue Discussions */}
+      {/* Active Discussions */}
       {data?.continueDiscussions && data.continueDiscussions.length > 0 && (
         <section>
           <h2 className="text-[#94a3b8] text-xs uppercase tracking-widest font-semibold mb-4">
@@ -99,6 +79,26 @@ export default function FeedPage() {
                   <span className="text-[#94a3b8] text-xs">{d.discussionCount} replies</span>
                 </div>
                 <p className="text-[#94a3b8] text-sm line-clamp-2">{d.dropContent}</p>
+              </Link>
+            ))}
+          </div>
+        </section>
+      )}
+
+      {/* Trending Topics */}
+      {data?.trendingTopics && data.trendingTopics.length > 0 && (
+        <section>
+          <h2 className="text-[#94a3b8] text-xs uppercase tracking-widest font-semibold mb-4">
+            Trending Topics
+          </h2>
+          <div className="flex flex-wrap gap-2">
+            {data.trendingTopics.map((t) => (
+              <Link
+                key={t.id}
+                href={`/topics/${t.id}`}
+                className="border border-[#1e293b] text-[#cbd5e1] px-4 py-2 rounded-full text-sm hover:border-[#38bdf8]/40 hover:text-[#f8fafc] transition-colors"
+              >
+                {t.title}
               </Link>
             ))}
           </div>
