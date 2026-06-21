@@ -6,9 +6,32 @@ import { GoogleOAuthProvider } from '@react-oauth/google';
 import { Nav } from '@/components/Nav';
 import { BottomNav } from '@/components/BottomNav';
 
+const SITE = 'https://www.lorva.app';
+
 export const metadata: Metadata = {
-  title: 'Atlas — Human experiences mapped.',
-  description: 'Discover accumulated human experiences on any topic.',
+  metadataBase: new URL(SITE),
+  title: {
+    default: 'Atlas — Human experiences mapped.',
+    template: '%s | Atlas',
+  },
+  description: 'Discover accumulated human experiences on any topic. Atlas is a searchable map of real stories, advice and lessons from people who have already been there.',
+  keywords: ['human experiences', 'personal stories', 'advice', 'reviews', 'community knowledge'],
+  authors: [{ name: 'Atlas' }],
+  creator: 'Atlas',
+  openGraph: {
+    type: 'website',
+    siteName: 'Atlas',
+    title: 'Atlas — Human experiences mapped.',
+    description: 'Discover accumulated human experiences on any topic.',
+    url: SITE,
+  },
+  twitter: {
+    card: 'summary',
+    title: 'Atlas — Human experiences mapped.',
+    description: 'Discover accumulated human experiences on any topic.',
+  },
+  alternates: { canonical: SITE },
+  robots: { index: true, follow: true },
 };
 
 const GOOGLE_CLIENT_ID = process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID ?? '';

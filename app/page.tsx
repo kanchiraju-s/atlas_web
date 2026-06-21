@@ -34,8 +34,22 @@ export default function LandingPage() {
     if (query.trim()) router.push(`/search?q=${encodeURIComponent(query.trim())}`);
   }
 
+  const jsonLd = {
+    '@context': 'https://schema.org',
+    '@type': 'WebSite',
+    name: 'Atlas',
+    description: 'A searchable atlas of human experiences. Discover accumulated knowledge, stories and advice from people who have already been there.',
+    url: 'https://www.lorva.app',
+    potentialAction: {
+      '@type': 'SearchAction',
+      target: { '@type': 'EntryPoint', urlTemplate: 'https://www.lorva.app/search?q={search_term_string}' },
+      'query-input': 'required name=search_term_string',
+    },
+  };
+
   return (
     <div style={{ minHeight: '80vh', display: 'flex', flexDirection: 'column', justifyContent: 'center', padding: '0 0 60px' }}>
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }} />
       {/* Hero */}
       <div style={{ marginBottom: 40 }}>
         <p style={{ fontSize: 12, fontWeight: 500, letterSpacing: '0.1em', textTransform: 'uppercase', color: 'var(--text-muted)', marginBottom: 16 }}>
