@@ -18,23 +18,12 @@ export default function TopicPage() {
   const [confirmDelete, setConfirmDelete] = useState(false);
   const qc = useQueryClient();
 
-  const topic = useQuery({
-    queryKey: ['topic', id],
-    queryFn: () => getTopic(id),
-  });
-
-  const drops = useQuery({
-    queryKey: ['drops', id],
-    queryFn: () => getDrops(id),
-  });
+  const topic = useQuery({ queryKey: ['topic', id], queryFn: () => getTopic(id) });
+  const drops = useQuery({ queryKey: ['drops', id], queryFn: () => getDrops(id) });
 
   const createDropMut = useMutation({
     mutationFn: (content: string) => createDrop(id, content),
-    onSuccess: () => {
-      setDraft('');
-      setComposing(false);
-      qc.invalidateQueries({ queryKey: ['drops', id] });
-    },
+    onSuccess: () => { setDraft(''); setComposing(false); qc.invalidateQueries({ queryKey: ['drops', id] }); },
   });
 
   const deleteTopicMut = useMutation({
@@ -45,51 +34,46 @@ export default function TopicPage() {
   const emoji = topic.data ? getTopicEmoji(topic.data.title) : '🌍';
 
   return (
-    <div className="flex flex-col gap-10">
+    <div>
       {/* Destination header */}
-      <div className="flex flex-col gap-4 pt-2">
+      <div style={{ marginBottom: 40 }}>
         {topic.isLoading ? (
-          <div className="flex flex-col gap-3">
-            <div className="h-12 w-12 rounded-2xl animate-pulse" style={{ background: '#111111' }} />
-            <div className="h-8 w-64 rounded-xl animate-pulse" style={{ background: '#111111' }} />
-          </div>
+          <>
+            <div style={{ height: 40, width: 40, background: 'var(--surface)', borderRadius: 8, marginBottom: 12 }} />
+            <div style={{ height: 24, width: '60%', background: 'var(--surface)', borderRadius: 6 }} />
+          </>
         ) : (
           <>
-            <div className="flex items-start justify-between gap-4">
-              <div className="flex flex-col gap-2">
-                <span className="text-4xl">{emoji}</span>
-                <h1 className="text-2xl sm:text-3xl font-bold tracking-tight" style={{ letterSpacing: '-0.02em' }}>
+            <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', gap: 16 }}>
+              <div>
+                <div style={{ fontSize: 32, marginBottom: 8, lineHeight: 1 }}>{emoji}</div>
+                <h1 style={{ fontSize: 22, fontWeight: 700, letterSpacing: '-0.02em', color: 'var(--text-primary)', marginBottom: 6 }}>
                   {topic.data?.title}
                 </h1>
                 {(drops.data?.drops.length ?? 0) > 0 && (
-                  <p className="text-sm" style={{ color: '#71717A' }}>
+                  <p style={{ fontSize: 13, color: 'var(--text-muted)' }}>
                     {drops.data!.drops.length} {drops.data!.drops.length === 1 ? 'experience' : 'experiences'}
                   </p>
                 )}
               </div>
 
               {user && topic.data?.createdBy === user.id && (
-                <div className="flex-shrink-0 pt-1">
+                <div>
                   {confirmDelete ? (
-                    <div className="flex items-center gap-2">
-                      <span className="text-xs" style={{ color: '#A1A1AA' }}>Delete?</span>
-                      <button
-                        onClick={() => deleteTopicMut.mutate()}
-                        disabled={deleteTopicMut.isPending}
-                        className="text-xs font-semibold text-red-400 disabled:opacity-50"
-                      >
+                    <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+                      <span style={{ fontSize: 12, color: 'var(--text-secondary)' }}>Delete?</span>
+                      <button onClick={() => deleteTopicMut.mutate()} disabled={deleteTopicMut.isPending}
+                        style={{ fontSize: 12, color: 'var(--danger)', background: 'none', border: 'none', cursor: 'pointer', fontWeight: 600 }}>
                         {deleteTopicMut.isPending ? 'Deleting…' : 'Yes'}
                       </button>
-                      <button onClick={() => setConfirmDelete(false)} className="text-xs" style={{ color: '#71717A' }}>
+                      <button onClick={() => setConfirmDelete(false)}
+                        style={{ fontSize: 12, color: 'var(--text-muted)', background: 'none', border: 'none', cursor: 'pointer' }}>
                         No
                       </button>
                     </div>
                   ) : (
-                    <button
-                      onClick={() => setConfirmDelete(true)}
-                      className="text-xs px-3 py-1.5 rounded-xl transition-colors"
-                      style={{ color: '#71717A', border: '1px solid rgba(255,255,255,0.08)' }}
-                    >
+                    <button onClick={() => setConfirmDelete(true)}
+                      style={{ fontSize: 12, color: 'var(--text-muted)', background: 'none', border: '1px solid var(--border)', borderRadius: 8, padding: '5px 12px', cursor: 'pointer' }}>
                       Delete
                     </button>
                   )}
@@ -101,95 +85,82 @@ export default function TopicPage() {
       </div>
 
       {/* Compose */}
-      {user ? (
-        <div className="rounded-2xl p-5 transition-all" style={{ background: '#111111', border: '1px solid rgba(255,255,255,0.08)' }}>
-          {composing ? (
-            <div className="flex flex-col gap-4">
+      <div style={{ marginBottom: 40, padding: '16px 0', borderTop: '1px solid var(--border)', borderBottom: '1px solid var(--border)' }}>
+        {user ? (
+          composing ? (
+            <div>
               <textarea
                 autoFocus
                 value={draft}
-                onChange={(e) => setDraft(e.target.value)}
-                placeholder="Share your experience here…"
+                onChange={e => setDraft(e.target.value)}
+                placeholder="Share your experience…"
                 rows={4}
-                className="w-full bg-transparent resize-none focus:outline-none text-sm leading-relaxed"
-                style={{ color: '#FFFFFF' }}
+                style={{
+                  width: '100%', background: 'none', border: 'none', outline: 'none',
+                  fontSize: 15, lineHeight: 1.65, color: 'var(--text-primary)', resize: 'none',
+                  marginBottom: 12,
+                }}
               />
-              <div className="flex items-center justify-between">
-                <span className="text-xs" style={{ color: '#71717A' }}>{draft.length} chars</span>
-                <div className="flex gap-2">
-                  <button
-                    onClick={() => { setComposing(false); setDraft(''); }}
-                    className="text-sm px-4 py-2 rounded-xl transition-colors"
-                    style={{ color: '#71717A' }}
-                  >
-                    Cancel
-                  </button>
-                  <button
-                    disabled={draft.trim().length < 3 || createDropMut.isPending}
-                    onClick={() => createDropMut.mutate(draft.trim())}
-                    className="px-5 py-2 rounded-xl text-sm font-semibold disabled:opacity-50 transition-opacity hover:opacity-90"
-                    style={{ background: '#0A84FF', color: '#FFFFFF' }}
-                  >
-                    {createDropMut.isPending ? 'Posting…' : 'Drop it'}
-                  </button>
-                </div>
+              <div style={{ display: 'flex', justifyContent: 'flex-end', gap: 10 }}>
+                <button onClick={() => { setComposing(false); setDraft(''); }}
+                  style={{ fontSize: 13, color: 'var(--text-muted)', background: 'none', border: 'none', cursor: 'pointer', padding: '6px 12px' }}>
+                  Cancel
+                </button>
+                <button
+                  disabled={draft.trim().length < 3 || createDropMut.isPending}
+                  onClick={() => createDropMut.mutate(draft.trim())}
+                  style={{ fontSize: 13, fontWeight: 600, background: 'var(--accent)', color: '#fff', border: 'none', borderRadius: 8, padding: '7px 18px', cursor: 'pointer', opacity: draft.trim().length < 3 ? 0.5 : 1 }}>
+                  {createDropMut.isPending ? 'Posting…' : 'Drop it'}
+                </button>
               </div>
-              {createDropMut.isError && (
-                <p className="text-red-400 text-xs">Failed to post. Try again.</p>
-              )}
             </div>
           ) : (
-            <button
-              onClick={() => setComposing(true)}
-              className="text-sm w-full text-left transition-colors"
-              style={{ color: '#71717A' }}
-            >
+            <button onClick={() => setComposing(true)}
+              style={{ fontSize: 14, color: 'var(--text-muted)', background: 'none', border: 'none', cursor: 'pointer', textAlign: 'left', width: '100%', padding: 0 }}>
               Share your experience on this topic…
             </button>
-          )}
-        </div>
-      ) : (
-        <div className="rounded-2xl p-5 flex items-center justify-between" style={{ background: '#111111', border: '1px solid rgba(255,255,255,0.08)' }}>
-          <span className="text-sm" style={{ color: '#A1A1AA' }}>Sign in to share your experience.</span>
-          <Link href="/auth" className="text-sm font-semibold" style={{ color: '#0A84FF' }}>
-            Sign in
-          </Link>
-        </div>
-      )}
+          )
+        ) : (
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+            <span style={{ fontSize: 14, color: 'var(--text-muted)' }}>Sign in to share your experience.</span>
+            <Link href="/auth" style={{ fontSize: 13, fontWeight: 600, color: 'var(--accent)' }}>Sign in</Link>
+          </div>
+        )}
+      </div>
 
-      {/* Drops as journal entries */}
+      {/* Drops — journal entries */}
       {drops.isLoading ? (
-        <div className="flex flex-col gap-4">
+        <div>
           {[...Array(3)].map((_, i) => (
-            <div key={i} className="h-28 rounded-2xl animate-pulse" style={{ background: '#111111' }} />
+            <div key={i} style={{ padding: '20px 0', borderBottom: '1px solid var(--border)' }}>
+              <div style={{ height: 15, width: '85%', background: 'var(--surface)', borderRadius: 4, marginBottom: 8 }} />
+              <div style={{ height: 15, width: '65%', background: 'var(--surface)', borderRadius: 4, marginBottom: 12 }} />
+              <div style={{ height: 11, width: '20%', background: 'var(--surface)', borderRadius: 4 }} />
+            </div>
           ))}
         </div>
       ) : drops.data?.drops.length === 0 ? (
-        <p className="text-sm text-center py-12" style={{ color: '#71717A' }}>
-          No experiences yet. Be the first to drop one.
-        </p>
+        <p style={{ fontSize: 14, color: 'var(--text-muted)', padding: '40px 0' }}>No experiences yet. Be the first.</p>
       ) : (
-        <div className="flex flex-col">
+        <div>
           {drops.data?.drops.map((drop, idx) => (
             <Link
               key={drop.id}
               href={`/drops/${drop.id}`}
-              className="block py-5 transition-all duration-150 group"
-              style={{ borderBottom: idx < (drops.data?.drops.length ?? 0) - 1 ? '1px solid rgba(255,255,255,0.05)' : 'none' }}
+              style={{
+                display: 'block', padding: '20px 0',
+                borderBottom: idx < (drops.data?.drops.length ?? 0) - 1 ? '1px solid var(--border)' : 'none',
+                transition: 'opacity 150ms',
+              }}
+              onMouseEnter={e => { (e.currentTarget as HTMLElement).style.opacity = '0.7'; }}
+              onMouseLeave={e => { (e.currentTarget as HTMLElement).style.opacity = '1'; }}
             >
-              <p className="text-base leading-relaxed group-hover:opacity-80 transition-opacity" style={{ color: '#FFFFFF' }}>
+              <p style={{ fontSize: 15, lineHeight: 1.65, color: 'var(--text-primary)', marginBottom: 10, display: '-webkit-box', WebkitLineClamp: 4, WebkitBoxOrient: 'vertical', overflow: 'hidden' }}>
                 {drop.content}
               </p>
-              <div className="flex items-center gap-3 mt-3">
-                <span className="text-xs font-medium" style={{ color: '#71717A' }}>{drop.authorName ?? 'Explorer'}</span>
-                <span className="text-xs" style={{ color: '#71717A' }}>·</span>
-                <span className="text-xs" style={{ color: '#71717A' }}>{timeAgo(drop.createdAt)}</span>
-                {(drop.discussionCount ?? 0) > 0 && (
-                  <>
-                    <span className="text-xs" style={{ color: '#71717A' }}>·</span>
-                    <span className="text-xs" style={{ color: '#0A84FF' }}>{drop.discussionCount} {drop.discussionCount === 1 ? 'reply' : 'replies'}</span>
-                  </>
-                )}
+              <div style={{ fontSize: 12, color: 'var(--text-muted)' }}>
+                {drop.authorName ?? 'Explorer'} · {timeAgo(drop.createdAt)}
+                {(drop.discussionCount ?? 0) > 0 && ` · ${drop.discussionCount} ${drop.discussionCount === 1 ? 'reply' : 'replies'}`}
               </div>
             </Link>
           ))}

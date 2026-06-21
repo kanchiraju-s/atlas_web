@@ -8,15 +8,6 @@ import { getUserStats, getUserDrops, getUserTopics } from '@/services/userServic
 import { useAuthStore } from '@/store/authStore';
 import { getTopicEmoji, timeAgo } from '@/lib/design';
 
-function SectionLabel({ children }: { children: React.ReactNode }) {
-  return (
-    <div className="flex items-center gap-3 mb-4">
-      <span className="text-xs font-semibold uppercase tracking-widest" style={{ color: '#71717A' }}>{children}</span>
-      <div className="h-px flex-1" style={{ background: 'rgba(255,255,255,0.06)' }} />
-    </div>
-  );
-}
-
 export default function ProfilePage() {
   const router = useRouter();
   const user = useAuthStore((s) => s.user);
@@ -27,48 +18,29 @@ export default function ProfilePage() {
     if (!isLoading && !user) router.replace('/auth');
   }, [user, isLoading, router]);
 
-  const stats = useQuery({
-    queryKey: ['user-stats', user?.id],
-    queryFn: () => getUserStats(user!.id),
-    enabled: !!user,
-  });
-
-  const drops = useQuery({
-    queryKey: ['user-drops', user?.id],
-    queryFn: () => getUserDrops(user!.id),
-    enabled: !!user,
-  });
-
-  const topics = useQuery({
-    queryKey: ['user-topics', user?.id],
-    queryFn: () => getUserTopics(user!.id),
-    enabled: !!user,
-  });
-
-  function handleSignOut() {
-    clearAuth();
-    router.push('/');
-  }
+  const stats = useQuery({ queryKey: ['user-stats', user?.id], queryFn: () => getUserStats(user!.id), enabled: !!user });
+  const drops = useQuery({ queryKey: ['user-drops', user?.id], queryFn: () => getUserDrops(user!.id), enabled: !!user });
+  const topics = useQuery({ queryKey: ['user-topics', user?.id], queryFn: () => getUserTopics(user!.id), enabled: !!user });
 
   if (!user) return null;
 
+  const labelStyle: React.CSSProperties = { fontSize: 11, fontWeight: 600, letterSpacing: '0.08em', textTransform: 'uppercase', color: 'var(--text-muted)', marginBottom: 16 };
+
   return (
-    <div className="flex flex-col gap-10 max-w-xl">
+    <div>
       {/* Identity */}
-      <div className="flex items-start justify-between pt-2">
-        <div className="flex flex-col gap-1">
-          <h1 className="text-2xl font-bold tracking-tight">{user.displayName}</h1>
-          <p className="text-sm" style={{ color: '#71717A' }}>
-            {user.username && <span>@{user.username} · </span>}
-            Explorer #{user.explorerNumber}
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 40 }}>
+        <div>
+          <h1 style={{ fontSize: 20, fontWeight: 700, letterSpacing: '-0.02em', marginBottom: 4 }}>{user.displayName}</h1>
+          <p style={{ fontSize: 13, color: 'var(--text-muted)' }}>
+            {user.username && `@${user.username} · `}Explorer #{user.explorerNumber}
           </p>
         </div>
         <button
-          onClick={handleSignOut}
-          className="text-sm px-4 py-2 rounded-xl transition-colors"
-          style={{ color: '#71717A', border: '1px solid rgba(255,255,255,0.08)' }}
-          onMouseEnter={(e) => { e.currentTarget.style.color = '#FF453A'; e.currentTarget.style.borderColor = 'rgba(255,69,58,0.3)'; }}
-          onMouseLeave={(e) => { e.currentTarget.style.color = '#71717A'; e.currentTarget.style.borderColor = 'rgba(255,255,255,0.08)'; }}
+          onClick={() => { clearAuth(); router.push('/'); }}
+          style={{ fontSize: 13, color: 'var(--text-muted)', background: 'none', border: '1px solid var(--border)', borderRadius: 8, padding: '7px 14px', cursor: 'pointer', transition: 'color 150ms, border-color 150ms' }}
+          onMouseEnter={e => { e.currentTarget.style.color = 'var(--danger)'; e.currentTarget.style.borderColor = 'rgba(255,69,58,0.3)'; }}
+          onMouseLeave={e => { e.currentTarget.style.color = 'var(--text-muted)'; e.currentTarget.style.borderColor = 'var(--border)'; }}
         >
           Sign out
         </button>
@@ -76,16 +48,16 @@ export default function ProfilePage() {
 
       {/* Stats */}
       {stats.data && (
-        <div className="grid grid-cols-2 gap-2 sm:grid-cols-4">
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 1, marginBottom: 48, borderRadius: 12, overflow: 'hidden', border: '1px solid var(--border)', background: 'var(--border)' }}>
           {[
             { label: 'Drops', value: stats.data.dropsShared },
             { label: 'Discussions', value: stats.data.discussionsJoined },
             { label: 'Topics', value: stats.data.topicsCreated },
             { label: 'Explored', value: stats.data.topicsExplored },
-          ].map((s) => (
-            <div key={s.label} className="rounded-2xl p-4 text-center" style={{ background: '#111111', border: '1px solid rgba(255,255,255,0.06)' }}>
-              <div className="text-2xl font-bold mb-1">{s.value}</div>
-              <div className="text-xs" style={{ color: '#71717A' }}>{s.label}</div>
+          ].map(s => (
+            <div key={s.label} style={{ background: 'var(--bg)', padding: '20px 16px', textAlign: 'center' }}>
+              <div style={{ fontSize: 22, fontWeight: 700, letterSpacing: '-0.02em', marginBottom: 4 }}>{s.value}</div>
+              <div style={{ fontSize: 11, color: 'var(--text-muted)' }}>{s.label}</div>
             </div>
           ))}
         </div>
@@ -93,18 +65,17 @@ export default function ProfilePage() {
 
       {/* My Drops */}
       {(drops.data?.length ?? 0) > 0 && (
-        <section>
-          <SectionLabel>My Drops</SectionLabel>
-          <div className="flex flex-col">
+        <section style={{ marginBottom: 40 }}>
+          <div style={labelStyle}>My drops</div>
+          <div>
             {drops.data!.map((d, idx) => (
-              <Link
-                key={d.id}
-                href={`/drops/${d.id}`}
-                className="block py-4 transition-opacity hover:opacity-70"
-                style={{ borderBottom: idx < drops.data!.length - 1 ? '1px solid rgba(255,255,255,0.05)' : 'none' }}
+              <Link key={d.id} href={`/drops/${d.id}`}
+                style={{ display: 'block', padding: '18px 0', borderBottom: idx < drops.data!.length - 1 ? '1px solid var(--border)' : 'none', transition: 'opacity 150ms' }}
+                onMouseEnter={e => { (e.currentTarget as HTMLElement).style.opacity = '0.7'; }}
+                onMouseLeave={e => { (e.currentTarget as HTMLElement).style.opacity = '1'; }}
               >
-                <p className="text-sm leading-relaxed line-clamp-2" style={{ color: '#FFFFFF' }}>{d.content}</p>
-                <p className="text-xs mt-1.5" style={{ color: '#71717A' }}>{timeAgo(d.createdAt)}</p>
+                <p style={{ fontSize: 14, lineHeight: 1.6, color: 'var(--text-primary)', marginBottom: 6, display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', overflow: 'hidden' }}>{d.content}</p>
+                <span style={{ fontSize: 12, color: 'var(--text-muted)' }}>{timeAgo(d.createdAt)}</span>
               </Link>
             ))}
           </div>
@@ -114,22 +85,16 @@ export default function ProfilePage() {
       {/* My Destinations */}
       {(topics.data?.length ?? 0) > 0 && (
         <section>
-          <SectionLabel>My Destinations</SectionLabel>
-          <div className="flex flex-col gap-2">
-            {topics.data!.map((t) => (
-              <Link
-                key={t.id}
-                href={`/topics/${t.id}`}
-                className="flex items-center gap-3 px-4 py-3 rounded-2xl transition-all duration-150 group"
-                style={{ background: '#111111', border: '1px solid rgba(255,255,255,0.06)' }}
-                onMouseEnter={(e) => { e.currentTarget.style.borderColor = 'rgba(255,255,255,0.12)'; }}
-                onMouseLeave={(e) => { e.currentTarget.style.borderColor = 'rgba(255,255,255,0.06)'; }}
+          <div style={labelStyle}>My destinations</div>
+          <div>
+            {topics.data!.map((t, i) => (
+              <Link key={t.id} href={`/topics/${t.id}`}
+                style={{ display: 'flex', alignItems: 'center', gap: 12, padding: '13px 0', borderBottom: i < topics.data!.length - 1 ? '1px solid var(--border)' : 'none', fontSize: 14, color: 'var(--text-primary)', transition: 'opacity 150ms' }}
+                onMouseEnter={e => { (e.currentTarget as HTMLElement).style.opacity = '0.6'; }}
+                onMouseLeave={e => { (e.currentTarget as HTMLElement).style.opacity = '1'; }}
               >
-                <span className="text-base">{getTopicEmoji(t.title)}</span>
-                <span className="text-sm flex-1">{t.title}</span>
-                <svg className="opacity-0 group-hover:opacity-100 transition-opacity" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#71717A" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                  <path d="M5 12h14M12 5l7 7-7 7" />
-                </svg>
+                <span style={{ fontSize: 16 }}>{getTopicEmoji(t.title)}</span>
+                {t.title}
               </Link>
             ))}
           </div>
@@ -137,11 +102,9 @@ export default function ProfilePage() {
       )}
 
       {drops.data?.length === 0 && topics.data?.length === 0 && (
-        <div className="flex flex-col items-center gap-3 py-12 text-center">
-          <p style={{ color: '#71717A' }}>Nothing here yet.</p>
-          <Link href="/feed" className="text-sm font-medium" style={{ color: '#0A84FF' }}>
-            Start exploring →
-          </Link>
+        <div style={{ paddingTop: 60, textAlign: 'center' }}>
+          <p style={{ fontSize: 14, color: 'var(--text-muted)', marginBottom: 16 }}>Nothing here yet.</p>
+          <Link href="/feed" style={{ fontSize: 13, fontWeight: 500, color: 'var(--accent)' }}>Start exploring →</Link>
         </div>
       )}
     </div>

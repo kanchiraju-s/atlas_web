@@ -9,26 +9,23 @@ import type { AuthTokens } from '@/lib/api';
 function WaitlistScreen({ displayName }: { displayName: string }) {
   const clearAuth = useAuthStore((s) => s.clearAuth);
   return (
-    <div className="flex flex-col items-center justify-center min-h-[70vh] gap-8 text-center max-w-sm mx-auto">
-      <div className="text-5xl">🌍</div>
-      <div className="flex flex-col gap-3">
-        <h1 className="text-2xl font-bold tracking-tight">
+    <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', minHeight: '70vh', gap: 24, textAlign: 'center', maxWidth: 360, margin: '0 auto' }}>
+      <div style={{ fontSize: 40, lineHeight: 1 }}>🌍</div>
+      <div>
+        <h1 style={{ fontSize: 20, fontWeight: 700, letterSpacing: '-0.02em', marginBottom: 8 }}>
           You're on the waitlist, {displayName.split(' ')[0]}.
         </h1>
-        <p className="text-sm leading-relaxed" style={{ color: '#A1A1AA' }}>
-          Atlas alpha is limited to 500 explorers. You've secured your spot —
-          we'll let you know when it's your turn.
+        <p style={{ fontSize: 14, lineHeight: 1.65, color: 'var(--text-secondary)' }}>
+          Atlas alpha is limited to 500 explorers. You've secured your spot — we'll let you know when it's your turn.
         </p>
       </div>
-      <div className="w-full rounded-2xl px-6 py-5 flex flex-col gap-1 text-left" style={{ background: '#111111', border: '1px solid rgba(255,255,255,0.08)' }}>
-        <p className="text-xs uppercase tracking-widest font-semibold mb-1" style={{ color: '#71717A' }}>While you wait</p>
-        <p className="text-sm" style={{ color: '#A1A1AA' }}>You can still browse topics and drops as a guest.</p>
+      <div style={{ width: '100%', padding: '16px 20px', background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: 10 }}>
+        <p style={{ fontSize: 11, fontWeight: 600, letterSpacing: '0.08em', textTransform: 'uppercase', color: 'var(--text-muted)', marginBottom: 6 }}>While you wait</p>
+        <p style={{ fontSize: 13, color: 'var(--text-secondary)' }}>You can browse topics and drops as a guest.</p>
       </div>
-      <div className="flex gap-6">
-        <a href="/feed" className="text-sm font-medium" style={{ color: '#0A84FF' }}>Browse as guest</a>
-        <button onClick={clearAuth} className="text-sm transition-colors" style={{ color: '#71717A' }}>
-          Sign out
-        </button>
+      <div style={{ display: 'flex', gap: 24 }}>
+        <a href="/feed" style={{ fontSize: 13, fontWeight: 500, color: 'var(--accent)' }}>Browse as guest</a>
+        <button onClick={clearAuth} style={{ fontSize: 13, color: 'var(--text-muted)', background: 'none', border: 'none', cursor: 'pointer' }}>Sign out</button>
       </div>
     </div>
   );
@@ -45,11 +42,8 @@ export default function AuthPage() {
   useEffect(() => {
     if (isLoading) return;
     if (!user) return;
-    if (user.status === 'WAITLISTED') {
-      setWaitlisted({ displayName: user.displayName });
-    } else {
-      window.location.replace('/feed');
-    }
+    if (user.status === 'WAITLISTED') setWaitlisted({ displayName: user.displayName });
+    else window.location.replace('/feed');
   }, [isLoading]); // eslint-disable-line react-hooks/exhaustive-deps
 
   async function handleSuccess(credentialResponse: CredentialResponse) {
@@ -60,11 +54,8 @@ export default function AuthPage() {
     try {
       const tokens: AuthTokens = await signInWithGoogle(idToken);
       setAuth(tokens);
-      if (tokens.status === 'WAITLISTED') {
-        setWaitlisted({ displayName: tokens.displayName });
-      } else {
-        window.location.replace('/feed');
-      }
+      if (tokens.status === 'WAITLISTED') setWaitlisted({ displayName: tokens.displayName });
+      else window.location.replace('/feed');
     } catch (e: unknown) {
       setError(e instanceof Error ? e.message : 'Sign-in failed. Try again.');
     } finally {
@@ -75,20 +66,16 @@ export default function AuthPage() {
   if (waitlisted) return <WaitlistScreen displayName={waitlisted.displayName} />;
 
   return (
-    <div className="flex flex-col items-center justify-center min-h-[70vh] gap-10">
-      <div className="flex flex-col items-center gap-4 text-center max-w-xs">
-        <div className="text-4xl mb-2">🌍</div>
-        <h1 className="text-3xl font-black tracking-tight" style={{ letterSpacing: '-0.02em' }}>
-          Atlas
-        </h1>
-        <p className="text-base leading-relaxed" style={{ color: '#A1A1AA' }}>
-          A map of human experiences.
-        </p>
+    <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', minHeight: '70vh', gap: 36 }}>
+      <div style={{ textAlign: 'center' }}>
+        <p style={{ fontSize: 12, fontWeight: 500, letterSpacing: '0.1em', textTransform: 'uppercase', color: 'var(--text-muted)', marginBottom: 12 }}>Atlas</p>
+        <h1 style={{ fontSize: 28, fontWeight: 700, letterSpacing: '-0.03em', marginBottom: 10 }}>A map of human experiences.</h1>
+        <p style={{ fontSize: 15, color: 'var(--text-secondary)', lineHeight: 1.6 }}>Sign in to explore and share.</p>
       </div>
 
-      <div className="flex flex-col items-center gap-3 w-full max-w-xs">
+      <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 12 }}>
         {loading ? (
-          <div className="text-sm" style={{ color: '#71717A' }}>Signing in…</div>
+          <p style={{ fontSize: 14, color: 'var(--text-muted)' }}>Signing in…</p>
         ) : (
           <GoogleLogin
             onSuccess={handleSuccess}
@@ -100,14 +87,10 @@ export default function AuthPage() {
             width="300"
           />
         )}
-        {error && (
-          <p className="text-red-400 text-sm text-center">{error}</p>
-        )}
+        {error && <p style={{ fontSize: 13, color: 'var(--danger)', textAlign: 'center', maxWidth: 280 }}>{error}</p>}
       </div>
 
-      <p className="text-xs" style={{ color: '#71717A' }}>
-        500 explorer spots · Free during alpha
-      </p>
+      <p style={{ fontSize: 12, color: 'var(--text-muted)' }}>500 explorer spots · Free during alpha</p>
     </div>
   );
 }

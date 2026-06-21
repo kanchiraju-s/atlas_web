@@ -21,7 +21,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
           <QueryProvider>
             <AuthProvider>
               <Nav />
-              <main className="max-w-[1100px] mx-auto px-5 sm:px-8 pt-8 pb-28 sm:pb-16">
+              <main style={{ maxWidth: 660, margin: '0 auto', padding: '48px 20px 120px' }}>
                 {children}
               </main>
               <BottomNav />

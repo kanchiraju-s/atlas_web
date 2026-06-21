@@ -30,119 +30,108 @@ function CreateDropForm() {
 
   const mutation = useMutation({
     mutationFn: () => createDrop(selectedTopic!.id, content),
-    onSuccess: (drop) => router.push(`/drops/${drop.id}`),
+    onSuccess: drop => router.push(`/drops/${drop.id}`),
   });
 
+  const inputStyle: React.CSSProperties = {
+    width: '100%', padding: '13px 16px', fontSize: 14,
+    background: 'var(--surface)', border: '1px solid var(--border)',
+    borderRadius: 10, color: 'var(--text-primary)', outline: 'none', transition: 'border-color 150ms',
+  };
+
   return (
-    <div className="max-w-lg flex flex-col gap-8 pt-4">
-      <div className="flex items-center justify-between">
-        <h1 className="text-2xl font-bold tracking-tight" style={{ letterSpacing: '-0.02em' }}>
-          Drop an Experience
-        </h1>
-        <Link href="/create/topic" className="text-sm font-medium" style={{ color: '#0A84FF' }}>
-          + New destination
-        </Link>
+    <div style={{ maxWidth: 520 }}>
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', marginBottom: 36 }}>
+        <h1 style={{ fontSize: 20, fontWeight: 700, letterSpacing: '-0.02em' }}>Drop an Experience</h1>
+        <Link href="/create/topic" style={{ fontSize: 13, fontWeight: 500, color: 'var(--accent)' }}>+ New destination</Link>
       </div>
 
-      {/* Destination picker */}
-      <div className="flex flex-col gap-2">
-        <label className="text-xs font-semibold uppercase tracking-widest" style={{ color: '#71717A' }}>
-          Destination
-        </label>
-        {selectedTopic ? (
-          <div className="flex items-center gap-3 rounded-2xl px-4 py-3.5" style={{ background: '#111111', border: '1px solid rgba(10,132,255,0.3)' }}>
-            <span>{getTopicEmoji(selectedTopic.title)}</span>
-            <span className="text-sm flex-1">{selectedTopic.title}</span>
+      <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
+        {/* Destination */}
+        <div>
+          <p style={{ fontSize: 11, fontWeight: 600, letterSpacing: '0.08em', textTransform: 'uppercase', color: 'var(--text-muted)', marginBottom: 10 }}>Destination</p>
+          {selectedTopic ? (
+            <div style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '13px 16px', background: 'var(--surface)', border: '1px solid rgba(10,132,255,0.3)', borderRadius: 10 }}>
+              <span style={{ fontSize: 16 }}>{getTopicEmoji(selectedTopic.title)}</span>
+              <span style={{ fontSize: 14, flex: 1 }}>{selectedTopic.title}</span>
+              <button onClick={() => setSelectedTopic(null)}
+                style={{ fontSize: 12, color: 'var(--text-muted)', background: 'none', border: 'none', cursor: 'pointer' }}
+                onMouseEnter={e => { e.currentTarget.style.color = 'var(--text-primary)'; }}
+                onMouseLeave={e => { e.currentTarget.style.color = 'var(--text-muted)'; }}
+              >
+                Change
+              </button>
+            </div>
+          ) : (
+            <div style={{ position: 'relative' }}>
+              <input
+                type="text"
+                value={topicQuery}
+                onChange={e => setTopicQuery(e.target.value)}
+                placeholder="Search for a destination…"
+                style={inputStyle}
+                onFocus={e => { e.currentTarget.style.borderColor = 'rgba(10,132,255,0.5)'; }}
+                onBlur={e => { e.currentTarget.style.borderColor = 'var(--border)'; }}
+              />
+              {(topicSearch.data?.length ?? 0) > 0 && (
+                <div style={{
+                  position: 'absolute', top: 'calc(100% + 4px)', left: 0, right: 0,
+                  background: '#141414', border: '1px solid var(--border)',
+                  borderRadius: 10, overflow: 'hidden', zIndex: 10,
+                  boxShadow: '0 8px 32px rgba(0,0,0,0.6)',
+                }}>
+                  {topicSearch.data!.map(t => (
+                    <button key={t.id}
+                      onClick={() => { setSelectedTopic(t); setTopicQuery(''); }}
+                      style={{ width: '100%', display: 'flex', alignItems: 'center', gap: 10, padding: '12px 16px', fontSize: 14, background: 'none', border: 'none', cursor: 'pointer', color: 'var(--text-primary)', borderBottom: '1px solid var(--border)', textAlign: 'left' }}
+                      onMouseEnter={e => { (e.currentTarget as HTMLElement).style.background = 'rgba(255,255,255,0.04)'; }}
+                      onMouseLeave={e => { (e.currentTarget as HTMLElement).style.background = 'none'; }}
+                    >
+                      <span style={{ fontSize: 16 }}>{getTopicEmoji(t.title)}</span>
+                      {t.title}
+                    </button>
+                  ))}
+                </div>
+              )}
+            </div>
+          )}
+        </div>
+
+        {/* Content */}
+        <div>
+          <p style={{ fontSize: 11, fontWeight: 600, letterSpacing: '0.08em', textTransform: 'uppercase', color: 'var(--text-muted)', marginBottom: 10 }}>Your experience</p>
+          <textarea
+            value={content}
+            onChange={e => setContent(e.target.value)}
+            placeholder="Share your experience, story, opinion, or honest take…"
+            rows={8}
+            maxLength={2000}
+            style={{ ...inputStyle, resize: 'none', lineHeight: 1.65 }}
+            onFocus={e => { e.currentTarget.style.borderColor = 'rgba(10,132,255,0.5)'; }}
+            onBlur={e => { e.currentTarget.style.borderColor = 'var(--border)'; }}
+          />
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: 10 }}>
+            <span style={{ fontSize: 12, color: 'var(--text-muted)' }}>{content.length}/2000</span>
             <button
-              onClick={() => setSelectedTopic(null)}
-              className="text-xs transition-colors"
-              style={{ color: '#71717A' }}
-              onMouseEnter={(e) => { e.currentTarget.style.color = '#FFFFFF'; }}
-              onMouseLeave={(e) => { e.currentTarget.style.color = '#71717A'; }}
+              disabled={!selectedTopic || content.trim().length < 10 || mutation.isPending}
+              onClick={() => mutation.mutate()}
+              style={{
+                padding: '10px 22px', background: 'var(--accent)', color: '#fff',
+                border: 'none', borderRadius: 9, fontSize: 14, fontWeight: 600,
+                cursor: !selectedTopic || content.trim().length < 10 ? 'default' : 'pointer',
+                opacity: !selectedTopic || content.trim().length < 10 ? 0.5 : 1,
+              }}
             >
-              Change
+              {mutation.isPending ? 'Dropping…' : 'Drop it'}
             </button>
           </div>
-        ) : (
-          <div className="relative">
-            <input
-              type="text"
-              value={topicQuery}
-              onChange={(e) => setTopicQuery(e.target.value)}
-              placeholder="Search for a destination…"
-              className="w-full py-3.5 px-4 text-sm rounded-2xl focus:outline-none transition-all"
-              style={{
-                background: '#111111',
-                border: '1px solid rgba(255,255,255,0.08)',
-                color: '#FFFFFF',
-              }}
-              onFocus={(e) => { e.currentTarget.style.borderColor = 'rgba(10,132,255,0.4)'; }}
-              onBlur={(e) => { e.currentTarget.style.borderColor = 'rgba(255,255,255,0.08)'; }}
-            />
-            {(topicSearch.data?.length ?? 0) > 0 && (
-              <div className="absolute top-full mt-1 w-full rounded-2xl overflow-hidden z-10" style={{ background: '#1C1C1E', border: '1px solid rgba(255,255,255,0.08)', boxShadow: '0 8px 32px rgba(0,0,0,0.6)' }}>
-                {topicSearch.data!.map((t) => (
-                  <button
-                    key={t.id}
-                    onClick={() => { setSelectedTopic(t); setTopicQuery(''); }}
-                    className="w-full text-left px-4 py-3 text-sm flex items-center gap-3 transition-colors"
-                    style={{ borderBottom: '1px solid rgba(255,255,255,0.04)' }}
-                    onMouseEnter={(e) => { e.currentTarget.style.background = 'rgba(255,255,255,0.04)'; }}
-                    onMouseLeave={(e) => { e.currentTarget.style.background = 'transparent'; }}
-                  >
-                    <span className="text-base">{getTopicEmoji(t.title)}</span>
-                    <span>{t.title}</span>
-                  </button>
-                ))}
-              </div>
-            )}
-          </div>
-        )}
-      </div>
-
-      {/* Content */}
-      <div className="flex flex-col gap-3">
-        <label className="text-xs font-semibold uppercase tracking-widest" style={{ color: '#71717A' }}>
-          Your experience
-        </label>
-        <textarea
-          value={content}
-          onChange={(e) => setContent(e.target.value)}
-          placeholder="Share your experience, story, opinion, or honest take…"
-          rows={7}
-          maxLength={2000}
-          className="w-full rounded-2xl px-5 py-4 text-sm resize-none focus:outline-none transition-all leading-relaxed"
-          style={{
-            background: '#111111',
-            border: '1px solid rgba(255,255,255,0.08)',
-            color: '#FFFFFF',
-          }}
-          onFocus={(e) => { e.currentTarget.style.borderColor = 'rgba(10,132,255,0.4)'; }}
-          onBlur={(e) => { e.currentTarget.style.borderColor = 'rgba(255,255,255,0.08)'; }}
-        />
-        <div className="flex items-center justify-between">
-          <span className="text-xs" style={{ color: '#71717A' }}>{content.length}/2000</span>
-          <button
-            disabled={!selectedTopic || content.trim().length < 10 || mutation.isPending}
-            onClick={() => mutation.mutate()}
-            className="px-6 py-3 rounded-2xl font-semibold text-sm disabled:opacity-50 transition-opacity hover:opacity-90"
-            style={{ background: '#0A84FF', color: '#FFFFFF' }}
-          >
-            {mutation.isPending ? 'Dropping…' : 'Drop it'}
-          </button>
+          {mutation.isError && <p style={{ fontSize: 13, color: 'var(--danger)', marginTop: 8 }}>Failed to post. Try again.</p>}
         </div>
-        {mutation.isError && (
-          <p className="text-red-400 text-sm">Failed to post. Try again.</p>
-        )}
       </div>
     </div>
   );
 }
 
 export default function CreateDropPage() {
-  return (
-    <Suspense>
-      <CreateDropForm />
-    </Suspense>
-  );
+  return <Suspense><CreateDropForm /></Suspense>;
 }

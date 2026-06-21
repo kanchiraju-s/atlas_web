@@ -4,80 +4,57 @@ import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useAuthStore } from '@/store/authStore';
 
+const navLink: React.CSSProperties = {
+  fontSize: 14,
+  color: 'var(--text-secondary)',
+  padding: '6px 10px',
+  borderRadius: 8,
+  transition: 'color 150ms',
+};
+
 export function Nav() {
   const user = useAuthStore((s) => s.user);
   const clearAuth = useAuthStore((s) => s.clearAuth);
   const router = useRouter();
 
-  function handleSignOut() {
-    clearAuth();
-    router.push('/');
-  }
-
   return (
-    <nav
-      className="sticky top-0 z-50"
-      style={{
-        background: 'rgba(0,0,0,0.8)',
-        backdropFilter: 'blur(20px)',
-        WebkitBackdropFilter: 'blur(20px)',
-        borderBottom: '1px solid rgba(255,255,255,0.06)',
-      }}
-    >
-      <div className="max-w-[1100px] mx-auto px-5 h-14 flex items-center justify-between">
-        <Link href="/" className="font-bold text-lg tracking-tight text-white">
+    <nav style={{
+      position: 'sticky', top: 0, zIndex: 50,
+      background: 'rgba(0,0,0,0.85)',
+      backdropFilter: 'blur(24px)',
+      WebkitBackdropFilter: 'blur(24px)',
+      borderBottom: '1px solid var(--border)',
+    }}>
+      <div style={{ maxWidth: 660, margin: '0 auto', padding: '0 20px', height: 52, display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+        <Link href="/" style={{ fontWeight: 700, fontSize: 15, color: 'var(--text-primary)', letterSpacing: '-0.02em' }}>
           Atlas
         </Link>
 
-        {/* Desktop nav */}
-        <div className="hidden sm:flex items-center gap-1">
-          <Link href="/feed" className="px-3 py-1.5 rounded-lg text-sm transition-colors duration-150" style={{ color: '#A1A1AA' }}
-            onMouseEnter={e => (e.currentTarget.style.color = '#FFFFFF')}
-            onMouseLeave={e => (e.currentTarget.style.color = '#A1A1AA')}
-          >
-            Explore
-          </Link>
-          <Link href="/search" className="px-3 py-1.5 rounded-lg text-sm transition-colors duration-150" style={{ color: '#A1A1AA' }}
-            onMouseEnter={e => (e.currentTarget.style.color = '#FFFFFF')}
-            onMouseLeave={e => (e.currentTarget.style.color = '#A1A1AA')}
-          >
-            Search
-          </Link>
+        <div className="hidden sm:flex items-center" style={{ gap: 2 }}>
+          <Link href="/feed" style={navLink} onMouseEnter={e => (e.currentTarget.style.color = 'var(--text-primary)')} onMouseLeave={e => (e.currentTarget.style.color = 'var(--text-secondary)')}>Explore</Link>
+          <Link href="/search" style={navLink} onMouseEnter={e => (e.currentTarget.style.color = 'var(--text-primary)')} onMouseLeave={e => (e.currentTarget.style.color = 'var(--text-secondary)')}>Search</Link>
           {user ? (
             <>
-              <Link href="/create/drop" className="px-3 py-1.5 rounded-lg text-sm transition-colors duration-150" style={{ color: '#A1A1AA' }}
-                onMouseEnter={e => (e.currentTarget.style.color = '#FFFFFF')}
-                onMouseLeave={e => (e.currentTarget.style.color = '#A1A1AA')}
-              >
-                Drop
-              </Link>
-              <Link href="/profile" className="ml-2 px-3 py-1.5 rounded-xl text-sm font-medium transition-all duration-150 truncate max-w-[140px]"
-                style={{ color: '#0A84FF' }}
-              >
+              <Link href="/create/drop" style={navLink} onMouseEnter={e => (e.currentTarget.style.color = 'var(--text-primary)')} onMouseLeave={e => (e.currentTarget.style.color = 'var(--text-secondary)')}>Drop</Link>
+              <Link href="/profile" style={{ ...navLink, color: 'var(--accent)', fontWeight: 500 }}
+                onMouseEnter={e => (e.currentTarget.style.opacity = '0.8')} onMouseLeave={e => (e.currentTarget.style.opacity = '1')}>
                 {user.displayName.split(' ')[0]}
               </Link>
-              <button onClick={handleSignOut} className="px-3 py-1.5 rounded-lg text-sm transition-colors duration-150" style={{ color: '#71717A' }}
-                onMouseEnter={e => (e.currentTarget.style.color = '#FFFFFF')}
-                onMouseLeave={e => (e.currentTarget.style.color = '#71717A')}
-              >
+              <button onClick={() => { clearAuth(); router.push('/'); }} style={{ ...navLink, cursor: 'pointer', border: 'none', background: 'none' }}
+                onMouseEnter={e => (e.currentTarget.style.color = 'var(--text-primary)')} onMouseLeave={e => (e.currentTarget.style.color = 'var(--text-secondary)')}>
                 Sign out
               </button>
             </>
           ) : (
-            <Link href="/auth" className="ml-2 px-4 py-1.5 rounded-xl text-sm font-semibold transition-opacity duration-150 hover:opacity-90"
-              style={{ background: '#0A84FF', color: '#FFFFFF' }}
-            >
+            <Link href="/auth" style={{ marginLeft: 8, padding: '6px 14px', borderRadius: 8, background: 'var(--accent)', color: '#fff', fontSize: 13, fontWeight: 600 }}>
               Sign in
             </Link>
           )}
         </div>
 
-        {/* Mobile: only show sign in if not authed */}
         <div className="sm:hidden">
           {!user && (
-            <Link href="/auth" className="px-4 py-1.5 rounded-xl text-sm font-semibold"
-              style={{ background: '#0A84FF', color: '#FFFFFF' }}
-            >
+            <Link href="/auth" style={{ padding: '6px 14px', borderRadius: 8, background: 'var(--accent)', color: '#fff', fontSize: 13, fontWeight: 600 }}>
               Sign in
             </Link>
           )}

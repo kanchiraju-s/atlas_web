@@ -29,9 +29,7 @@ export default function CreateTopicPage() {
     mutationFn: createTopic,
     onSuccess: (topic) => router.push(`/topics/${topic.id}`),
     onError: (err) => {
-      if (err instanceof ApiError && (err.status === 409 || err.status === 400)) {
-        setIsDuplicate(true);
-      }
+      if (err instanceof ApiError && (err.status === 409 || err.status === 400)) setIsDuplicate(true);
     },
   });
 
@@ -40,78 +38,64 @@ export default function CreateTopicPage() {
     mutation.mutate(title.trim());
   }
 
-  const exactMatch = existingTopics.data?.find(
-    (t) => t.title.toLowerCase() === title.trim().toLowerCase(),
-  ) ?? existingTopics.data?.[0];
+  const exactMatch = existingTopics.data?.find(t => t.title.toLowerCase() === title.trim().toLowerCase()) ?? existingTopics.data?.[0];
 
   return (
-    <div className="max-w-lg flex flex-col gap-8 pt-4">
-      <div className="flex flex-col gap-2">
-        <h1 className="text-2xl font-bold tracking-tight" style={{ letterSpacing: '-0.02em' }}>
-          New Destination
-        </h1>
-        <p className="text-sm" style={{ color: '#71717A' }}>
-          Create a topic that others can drop experiences into.
-        </p>
+    <div style={{ maxWidth: 520 }}>
+      <div style={{ marginBottom: 36 }}>
+        <h1 style={{ fontSize: 20, fontWeight: 700, letterSpacing: '-0.02em', marginBottom: 6 }}>New Destination</h1>
+        <p style={{ fontSize: 14, color: 'var(--text-muted)' }}>Create a topic that others can drop experiences into.</p>
       </div>
 
-      <div className="flex flex-col gap-3">
+      <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
         <input
           autoFocus
           type="text"
           value={title}
-          onChange={(e) => { setTitle(e.target.value); setIsDuplicate(false); }}
+          onChange={e => { setTitle(e.target.value); setIsDuplicate(false); }}
           placeholder="e.g. Solo travel in Japan"
           maxLength={120}
-          className="w-full py-4 px-5 text-base rounded-2xl focus:outline-none transition-all duration-200"
           style={{
-            background: '#111111',
-            border: isDuplicate ? '1px solid rgba(255,196,0,0.4)' : '1px solid rgba(255,255,255,0.08)',
-            color: '#FFFFFF',
+            width: '100%', padding: '14px 16px', fontSize: 15,
+            background: 'var(--surface)', color: 'var(--text-primary)',
+            border: isDuplicate ? '1px solid rgba(255,196,0,0.4)' : '1px solid var(--border)',
+            borderRadius: 10, outline: 'none', transition: 'border-color 150ms',
           }}
-          onFocus={(e) => {
-            if (!isDuplicate) e.currentTarget.style.borderColor = 'rgba(10,132,255,0.4)';
-          }}
-          onBlur={(e) => {
-            if (!isDuplicate) e.currentTarget.style.borderColor = 'rgba(255,255,255,0.08)';
-          }}
-          onKeyDown={(e) => {
-            if (e.key === 'Enter' && title.trim().length >= 3) handleSubmit();
-          }}
+          onFocus={e => { if (!isDuplicate) e.currentTarget.style.borderColor = 'rgba(10,132,255,0.5)'; }}
+          onBlur={e => { if (!isDuplicate) e.currentTarget.style.borderColor = 'var(--border)'; }}
+          onKeyDown={e => { if (e.key === 'Enter' && title.trim().length >= 3) handleSubmit(); }}
         />
 
         {isDuplicate && (
-          <div className="rounded-2xl px-5 py-4 flex flex-col gap-2" style={{ background: 'rgba(255,196,0,0.06)', border: '1px solid rgba(255,196,0,0.2)' }}>
-            <p className="text-sm font-medium" style={{ color: '#FFD60A' }}>
-              This destination already exists.
-            </p>
+          <div style={{ background: 'rgba(255,196,0,0.06)', border: '1px solid rgba(255,196,0,0.2)', borderRadius: 10, padding: '14px 16px' }}>
+            <p style={{ fontSize: 13, fontWeight: 500, color: '#FFD60A', marginBottom: 6 }}>This destination already exists.</p>
             {exactMatch ? (
-              <Link
-                href={`/topics/${exactMatch.id}`}
-                className="text-sm font-medium"
-                style={{ color: '#0A84FF' }}
-              >
+              <Link href={`/topics/${exactMatch.id}`} style={{ fontSize: 13, color: 'var(--accent)' }}>
                 Go to "{exactMatch.title}" →
               </Link>
             ) : (
-              <p className="text-xs" style={{ color: '#A1A1AA' }}>Try searching for it instead.</p>
+              <p style={{ fontSize: 13, color: 'var(--text-muted)' }}>Try searching for it instead.</p>
             )}
           </div>
         )}
 
         {mutation.isError && !isDuplicate && (
-          <p className="text-red-400 text-sm">Failed to create. Try again.</p>
+          <p style={{ fontSize: 13, color: 'var(--danger)' }}>Failed to create. Try again.</p>
         )}
 
-        <div className="flex items-center justify-between pt-1">
-          <span className="text-xs" style={{ color: '#71717A' }}>{title.length}/120</span>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', paddingTop: 4 }}>
+          <span style={{ fontSize: 12, color: 'var(--text-muted)' }}>{title.length}/120</span>
           <button
             disabled={title.trim().length < 3 || mutation.isPending}
             onClick={handleSubmit}
-            className="px-6 py-3 rounded-2xl font-semibold text-sm disabled:opacity-50 transition-opacity hover:opacity-90"
-            style={{ background: '#0A84FF', color: '#FFFFFF' }}
+            style={{
+              padding: '10px 22px', background: 'var(--accent)', color: '#fff',
+              border: 'none', borderRadius: 9, fontSize: 14, fontWeight: 600,
+              cursor: title.trim().length < 3 ? 'default' : 'pointer',
+              opacity: title.trim().length < 3 ? 0.5 : 1,
+            }}
           >
-            {mutation.isPending ? 'Creating…' : 'Create Destination'}
+            {mutation.isPending ? 'Creating…' : 'Create'}
           </button>
         </div>
       </div>
