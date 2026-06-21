@@ -44,15 +44,16 @@ export default function AuthPage() {
   const [loading, setLoading] = useState(false);
   const [waitlisted, setWaitlisted] = useState<{ displayName: string } | null>(null);
 
+  // Handle already-logged-in users landing on /auth
   useEffect(() => {
-    if (!isLoading && user) {
-      if (user.status === 'WAITLISTED') {
-        setWaitlisted({ displayName: user.displayName });
-      } else {
-        router.replace('/feed');
-      }
+    if (isLoading) return;
+    if (!user) return;
+    if (user.status === 'WAITLISTED') {
+      setWaitlisted({ displayName: user.displayName });
+    } else {
+      router.replace('/feed');
     }
-  }, [user, isLoading, router]);
+  }, [isLoading]); // eslint-disable-line react-hooks/exhaustive-deps
 
   async function handleSuccess(credentialResponse: CredentialResponse) {
     const idToken = credentialResponse.credential;
