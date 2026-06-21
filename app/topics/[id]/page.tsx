@@ -56,7 +56,7 @@ export default function TopicPage() {
           )}
         </div>
 
-        {user && !topic.isLoading && (
+        {user && !topic.isLoading && topic.data?.createdBy === user.id && (
           <div className="flex-shrink-0">
             {confirmDelete ? (
               <div className="flex items-center gap-2">

@@ -84,6 +84,7 @@ export interface Topic {
   id: string;
   title: string;
   createdAt: string;
+  createdBy?: string;
 }
 
 export interface Drop {
