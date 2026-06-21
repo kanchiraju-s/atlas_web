@@ -1,19 +1,21 @@
 'use client';
 
 import { useState } from 'react';
-import { useParams } from 'next/navigation';
+import { useParams, useRouter } from 'next/navigation';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import Link from 'next/link';
-import { getTopic } from '@/services/topicService';
+import { getTopic, deleteTopic } from '@/services/topicService';
 import { getDrops, createDrop } from '@/services/dropService';
 import { TimeAgo } from '@/components/TimeAgo';
 import { useAuthStore } from '@/store/authStore';
 
 export default function TopicPage() {
   const { id } = useParams<{ id: string }>();
+  const router = useRouter();
   const user = useAuthStore((s) => s.user);
   const [composing, setComposing] = useState(false);
   const [draft, setDraft] = useState('');
+  const [confirmDelete, setConfirmDelete] = useState(false);
   const qc = useQueryClient();
 
   const topic = useQuery({
@@ -35,16 +37,58 @@ export default function TopicPage() {
     },
   });
 
+  const deleteTopicMut = useMutation({
+    mutationFn: () => deleteTopic(id),
+    onSuccess: () => router.replace('/feed'),
+  });
+
   return (
     <div className="flex flex-col gap-8">
       {/* Header */}
-      <div>
-        {topic.isLoading ? (
-          <div className="h-8 w-64 bg-[#111827] rounded animate-pulse" />
-        ) : (
-          <h1 className="text-3xl font-black text-[#f8fafc] tracking-tight">
-            {topic.data?.title}
-          </h1>
+      <div className="flex items-start justify-between gap-4">
+        <div>
+          {topic.isLoading ? (
+            <div className="h-8 w-64 bg-[#111827] rounded animate-pulse" />
+          ) : (
+            <h1 className="text-3xl font-black text-[#f8fafc] tracking-tight">
+              {topic.data?.title}
+            </h1>
+          )}
+        </div>
+
+        {user && !topic.isLoading && (
+          <div className="flex-shrink-0">
+            {confirmDelete ? (
+              <div className="flex items-center gap-2">
+                <span className="text-[#94a3b8] text-xs">Delete this topic?</span>
+                <button
+                  onClick={() => deleteTopicMut.mutate()}
+                  disabled={deleteTopicMut.isPending}
+                  className="text-red-400 text-xs font-semibold hover:text-red-300 disabled:opacity-50 transition-colors"
+                >
+                  {deleteTopicMut.isPending ? 'Deleting…' : 'Yes, delete'}
+                </button>
+                <button
+                  onClick={() => setConfirmDelete(false)}
+                  className="text-[#94a3b8] text-xs hover:text-[#f8fafc] transition-colors"
+                >
+                  Cancel
+                </button>
+              </div>
+            ) : (
+              <button
+                onClick={() => setConfirmDelete(true)}
+                className="text-[#94a3b8] text-xs border border-[#1e293b] px-3 py-1.5 rounded-lg hover:text-red-400 hover:border-red-400/30 transition-colors"
+              >
+                Delete topic
+              </button>
+            )}
+            {deleteTopicMut.isError && (
+              <p className="text-red-400 text-xs mt-1 text-right">
+                Failed — you may not have permission.
+              </p>
+            )}
+          </div>
         )}
       </div>
 

@@ -72,7 +72,11 @@ async function postDirect<T>(path: string, body: unknown): Promise<T> {
   return request<T>(path, { method: 'POST', body: JSON.stringify(body) }, false);
 }
 
-export const api = { get, post, postDirect };
+async function del<T>(path: string): Promise<T> {
+  return request<T>(path, { method: 'DELETE' });
+}
+
+export const api = { get, post, postDirect, del };
 
 // ─── Domain types (mirrored from mobile src/lib/api.ts) ───────────────────────
 

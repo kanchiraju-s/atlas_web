@@ -11,3 +11,7 @@ export async function getTopic(id: string): Promise<Topic> {
 export async function createTopic(title: string): Promise<Topic> {
   return api.post<Topic>('/topics', { title });
 }
+
+export async function deleteTopic(id: string): Promise<void> {
+  return api.del<void>(`/topics/${encodeURIComponent(id)}`);
+}
