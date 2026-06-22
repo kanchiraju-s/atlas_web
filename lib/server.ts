@@ -17,6 +17,7 @@ async function apiFetch<T>(path: string, revalidate: number): Promise<T | null> 
 export interface ServerTopic {
   id: string;
   title: string;
+  slug?: string;
   createdAt: string;
   createdBy?: string;
 }
@@ -45,6 +46,10 @@ export async function serverGetDrops(topicId: string): Promise<ServerDrop[]> {
 
 export async function serverGetDrop(id: string): Promise<ServerDrop | null> {
   return apiFetch<ServerDrop>(`/drops/${encodeURIComponent(id)}`, 300);
+}
+
+export async function serverGetTopicBySlug(slug: string): Promise<ServerTopic | null> {
+  return apiFetch<ServerTopic>(`/topics/slug/${encodeURIComponent(slug)}`, 3600);
 }
 
 export async function serverGetTopicForDrop(topicId: string): Promise<ServerTopic | null> {

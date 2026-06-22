@@ -29,7 +29,7 @@ function Thread({ disc, dropId, depth = 0 }: { disc: Discussion; dropId: string;
         <p style={{ fontSize: 14, lineHeight: 1.6, color: 'var(--text-secondary)', marginBottom: 8 }}>{disc.content}</p>
         {user && depth < 3 && (
           <button onClick={() => setReplying(!replying)}
-            style={{ fontSize: 12, color: 'var(--text-muted)' }}
+            style={{ fontSize: 12, color: 'var(--text-muted)', background: 'none', border: 'none', cursor: 'pointer', padding: 0 }}
             onMouseEnter={e => { e.currentTarget.style.color = 'var(--accent)'; }}
             onMouseLeave={e => { e.currentTarget.style.color = 'var(--text-muted)'; }}
           >Reply</button>
@@ -43,7 +43,8 @@ function Thread({ disc, dropId, depth = 0 }: { disc: Discussion; dropId: string;
               style={{ width: '100%', background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: 8, padding: '10px 12px', fontSize: 13, color: 'var(--text-primary)', outline: 'none', resize: 'none', marginBottom: 8 }}
             />
             <div style={{ display: 'flex', gap: 8 }}>
-              <button onClick={() => { setReplying(false); setReplyText(''); }} style={{ fontSize: 12, color: 'var(--text-muted)', padding: '5px 10px' }}>Cancel</button>
+              <button onClick={() => { setReplying(false); setReplyText(''); }}
+                style={{ fontSize: 12, color: 'var(--text-muted)', background: 'none', border: 'none', cursor: 'pointer', padding: '5px 10px' }}>Cancel</button>
               <button
                 disabled={replyText.trim().length < 2 || replyMut.isPending}
                 onClick={() => replyMut.mutate(replyText.trim())}

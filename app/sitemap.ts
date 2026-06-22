@@ -7,7 +7,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const topics = await serverSearchTopics('');
 
   const topicEntries: MetadataRoute.Sitemap = topics.map((t) => ({
-    url: `${SITE}/topics/${t.id}`,
+    url: `${SITE}/topics/${t.slug ?? t.id}`,
     lastModified: t.createdAt ? new Date(t.createdAt) : new Date(),
     changeFrequency: 'daily',
     priority: 0.8,

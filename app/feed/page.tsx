@@ -131,7 +131,7 @@ export default function FeedPage() {
               <div style={S.label}>Destinations</div>
               <div>
                 {data.trendingTopics.map(t => (
-                  <Link key={t.id} href={`/topics/${t.id}`} style={S.destinationRow}
+                  <Link key={t.id} href={`/topics/${t.slug ?? t.id}`} style={S.destinationRow}
                     onMouseEnter={e => { (e.currentTarget as HTMLElement).style.opacity = '0.7'; }}
                     onMouseLeave={e => { (e.currentTarget as HTMLElement).style.opacity = '1'; }}
                   >

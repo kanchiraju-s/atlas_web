@@ -83,6 +83,7 @@ export const api = { get, post, postDirect, del };
 export interface Topic {
   id: string;
   title: string;
+  slug?: string;
   createdAt: string;
   createdBy?: string;
 }

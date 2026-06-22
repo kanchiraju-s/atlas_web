@@ -88,7 +88,7 @@ export default function ProfilePage() {
           <div style={labelStyle}>My destinations</div>
           <div>
             {topics.data!.map((t, i) => (
-              <Link key={t.id} href={`/topics/${t.id}`}
+              <Link key={t.id} href={`/topics/${t.slug ?? t.id}`}
                 style={{ display: 'flex', alignItems: 'center', gap: 12, padding: '13px 0', borderBottom: i < topics.data!.length - 1 ? '1px solid var(--border)' : 'none', fontSize: 14, color: 'var(--text-primary)', transition: 'opacity 150ms' }}
                 onMouseEnter={e => { (e.currentTarget as HTMLElement).style.opacity = '0.6'; }}
                 onMouseLeave={e => { (e.currentTarget as HTMLElement).style.opacity = '1'; }}
