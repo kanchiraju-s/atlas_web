@@ -2,9 +2,11 @@ import { Metadata } from 'next';
 import Link from 'next/link';
 import { redirect } from 'next/navigation';
 import { serverGetTopic, serverGetTopicBySlug, serverGetDrops, serverSearchTopics } from '@/lib/server';
-import { getTopicEmoji, timeAgo } from '@/lib/design';
+import { getTopicEmoji } from '@/lib/design';
 import { ComposeArea } from './ComposeArea';
 import { DeleteButton } from './DeleteButton';
+import { DropList } from './DropList';
+import { RelatedTopics } from './RelatedTopics';
 
 const SITE = 'https://www.lorva.app';
 const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
@@ -55,7 +57,6 @@ export default async function TopicPage(
   const emoji = topic ? getTopicEmoji(topic.title) : '🌍';
   const url = `${SITE}/topics/${slug}`;
 
-  // Related topics: search by most distinctive word in title
   const relatedTopics = topic
     ? (await serverSearchTopics(getSearchKeyword(topic.title)))
         .filter(t => t.id !== topic.id)
@@ -109,7 +110,7 @@ export default async function TopicPage(
       )}
 
       <div>
-        {/* Breadcrumb — visible + indexable */}
+        {/* Breadcrumb */}
         <nav aria-label="breadcrumb" style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: 12, color: 'var(--text-muted)', marginBottom: 32, flexWrap: 'wrap' as const }}>
           <Link href="/" style={crumbStyle}>Atlas</Link>
           {chevron}
@@ -142,64 +143,11 @@ export default async function TopicPage(
         {/* Compose — client boundary */}
         {topic && <ComposeArea topicId={topic.id} />}
 
-        {/* Drops — server-rendered, fully indexable */}
-        {drops.length === 0 ? (
-          <p style={{ fontSize: 14, color: 'var(--text-muted)', padding: '40px 0' }}>
-            No experiences yet. Be the first.
-          </p>
-        ) : (
-          <div>
-            {drops.map((drop, idx) => (
-              <Link
-                key={drop.id}
-                href={`/topics/${slug}/drops/${drop.id}`}
-                style={{
-                  display: 'block', padding: '20px 0',
-                  borderBottom: idx < drops.length - 1 ? '1px solid var(--border)' : 'none',
-                  transition: 'opacity 150ms',
-                }}
-                onMouseEnter={e => { (e.currentTarget as HTMLElement).style.opacity = '0.7'; }}
-                onMouseLeave={e => { (e.currentTarget as HTMLElement).style.opacity = '1'; }}
-              >
-                <p style={{ fontSize: 15, lineHeight: 1.65, color: 'var(--text-primary)', marginBottom: 10, display: '-webkit-box', WebkitLineClamp: 4, WebkitBoxOrient: 'vertical', overflow: 'hidden' }}>
-                  {drop.content}
-                </p>
-                <div style={{ fontSize: 12, color: 'var(--text-muted)' }}>
-                  {drop.authorName ?? 'Explorer'} · {timeAgo(drop.createdAt)}
-                  {(drop.discussionCount ?? 0) > 0 && ` · ${drop.discussionCount} ${drop.discussionCount === 1 ? 'reply' : 'replies'}`}
-                </div>
-              </Link>
-            ))}
-          </div>
-        )}
+        {/* Drops — client component (needs hover handlers) */}
+        <DropList drops={drops} topicSlug={slug} />
 
-        {/* Related Topics */}
-        {relatedTopics.length > 0 && (
-          <div style={{ marginTop: 56, paddingTop: 32, borderTop: '1px solid var(--border)' }}>
-            <p style={{ fontSize: 11, fontWeight: 600, letterSpacing: '0.08em', textTransform: 'uppercase', color: 'var(--text-muted)', marginBottom: 16 }}>
-              Related Topics
-            </p>
-            <div>
-              {relatedTopics.map((t, i) => (
-                <Link
-                  key={t.id}
-                  href={`/topics/${t.slug ?? t.id}`}
-                  style={{
-                    display: 'flex', alignItems: 'center', gap: 12,
-                    padding: '12px 0',
-                    borderBottom: i < relatedTopics.length - 1 ? '1px solid var(--border)' : 'none',
-                    fontSize: 14, color: 'var(--text-primary)', transition: 'opacity 150ms',
-                  }}
-                  onMouseEnter={e => { (e.currentTarget as HTMLElement).style.opacity = '0.6'; }}
-                  onMouseLeave={e => { (e.currentTarget as HTMLElement).style.opacity = '1'; }}
-                >
-                  <span style={{ fontSize: 16 }}>{getTopicEmoji(t.title)}</span>
-                  {t.title}
-                </Link>
-              ))}
-            </div>
-          </div>
-        )}
+        {/* Related Topics — client component */}
+        <RelatedTopics topics={relatedTopics} />
       </div>
     </>
   );
